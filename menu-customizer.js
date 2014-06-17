@@ -652,8 +652,8 @@
 				}
 
 				self.container.slideUp( function() {
-					var meunControl, menuItemIds, i;
-					meunControl = api.Menus.getMenuControl( self.params.menu_id );
+					var menuControl, menuItemIds, i;
+					menuControl = api.Menus.getMenuControl( self.params.menu_id );
 
 					if ( ! menuControl ) {
 						return;
