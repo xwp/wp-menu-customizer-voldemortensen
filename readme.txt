@@ -16,11 +16,13 @@ The Menu Customizer adds custom menu management to the Theme Customizer. It is p
 Several improvements to both Menus and the Theme Customizer are also in the works as a part of this project, in the form of core patches. All of the following tickets have patches, but most need to be reviewed still. If you're interested in any of the following (especially those awaiting review), please test them and leave comments on the ticket! All "REQUIRED" tickets are required for the Menu Customizer plugin to funciton as intended.
 
 Menus
+
 * <a href="https://core.trac.wordpress.org/ticket/23076">#23076</a>: Update menu item title when editing menu item label ''[committed to WordPress 4.0 alpha]''
 * <a href="https://core.trac.wordpress.org/ticket/13273">#13273</a>: Core support & UI for Placeholder Menu Items ''[awaiting review, needs feedback]''
 * <a href="https://core.trac.wordpress.org/ticket/28138">#28138</a>: Updating menu item requires passing all of a menu item's data to wp_update_nav_menu_item() ''[awaiting review, to  become required]''
 
 Customizer
+
 * <a href="https://core.trac.wordpress.org/ticket/27406">#27506</a>: Introduce Customizer "Pages", Organize all widget area sections into a customizer page ''[AWAITING FEEDBACK/REVIEW, REQUIRED]''
 * <a href="https://core.trac.wordpress.org/ticket/27979">#27979</a>: Pass Customizer Setting instance to `customize_update_` and `customize_preview_` actions ''[scheduled for WordPress 4.0, awaiting commit, REQUIRED]''
 * <a href="https://core.trac.wordpress.org/ticket/28477">#28477</a>: New Built-in Customizer Control Types ''[awaiting review]''
