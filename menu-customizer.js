@@ -103,6 +103,8 @@
 
 		// Performs a search within the collection.
 		// @uses RegExp
+		// @todo: this algorithm is slow and doesn't work; also, sort results by relevance.
+		// (was based on widget filtering, which is an entirely different use-case).
 		search: function( term ) {
 			var match, haystack;
 
@@ -1243,5 +1245,22 @@
 	function menuItemIdToSettingId( menuItemId, menuId ) {
 		return 'nav_menus[' + menuId + '][' + menuItemId + ']';
 	}
+
+	/**
+	 * Update Section Title as menu name is changed.
+	 */
+	function setupMenuNameUpdating() {
+		$( '#accordion-section-menus' ).on( 'input', '.customize-control-text input', function(e) {
+			var el = $( e.currentTarget ),
+				name = el.val(),
+				title = el.closest( '.accordion-section' ).find( '.accordion-section-title' );
+			// Empty names are not allowed, don't update to one.
+			if ( name ) {
+				title.html( name );
+			}
+		} );
+	}
+
+	$(document).ready(function(){ setupMenuNameUpdating(); });
 
 })( window.wp, jQuery );

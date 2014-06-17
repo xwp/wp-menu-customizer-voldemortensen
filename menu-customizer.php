@@ -35,7 +35,7 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
  */
 function menu_customizer_enqueue() {
 	wp_enqueue_style( 'menu-customizer', plugin_dir_url( __FILE__ ) . 'menu-customizer.css' );
-	wp_enqueue_script( 'menu-customizer-temp', plugin_dir_url( __FILE__ ) . 'menu-customizer-temp.js', array( 'jquery' ) );
+	wp_enqueue_script( 'menu-customizer-options', plugin_dir_url( __FILE__ ) . 'menu-customizer-options.js', array( 'jquery' ) );
 	wp_enqueue_script( 'menu-customizer', plugin_dir_url( __FILE__ ) . 'menu-customizer.js', array( 'jquery', 'wp-backbone', 'customize-controls' ) );
 
 	$menuitem_reorder_nav_tpl = sprintf(
@@ -411,25 +411,20 @@ function menu_customizer_available_item_types() {
 function menu_customizer_available_items_template() {
 ?>
 	<div id="available-menu-items" class="accordion-container">
-		<div id="new-custom-menu-item" class="accordion-section open">
+		<div id="new-custom-menu-item" class="accordion-section">
 			<h4 class="accordion-section-title"><?php _e( 'Links' ); ?></h4>
 			<div class="accordion-section-content">
-				<input type="hidden" value="custom" id="custom-menu-item-type" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][menu-item-type]" />
-				<p id="menu-item-placeholder-wrap">
-					<label for="custom-menu-item-placeholder">
-						<input id="custom-menu-item-placeholder" name="menu-item[<?php echo $_nav_menu_placeholder; ?>][menu-item-placeholder]" type="checkbox" value="1" > <?php _e( 'Placeholder' ); ?>
-					</label>
-				</p>
+				<input type="hidden" value="custom" id="custom-menu-item-type" name="menu-item[-1][menu-item-type]" />
 				<p id="menu-item-url-wrap">
 					<label class="howto" for="custom-menu-item-url">
 						<span>URL</span>
-						<input id="custom-menu-item-url" name="menu-item[-92][menu-item-url]" type="text" class="code menu-item-textbox" value="http://">
+						<input id="custom-menu-item-url" name="menu-item[-1][menu-item-url]" type="text" class="code menu-item-textbox" value="http://">
 					</label>
 				</p>
 				<p id="menu-item-name-wrap">
 					<label class="howto" for="custom-menu-item-name">
 						<span>Link Text</span>
-						<input id="custom-menu-item-name" name="menu-item[-92][menu-item-title]" type="text" class="regular-text menu-item-textbox input-with-default-title" title="Menu Item">
+						<input id="custom-menu-item-name" name="menu-item[-1][menu-item-title]" type="text" class="regular-text menu-item-textbox">
 					</label>
 				</p>
 				<p class="button-controls">
@@ -440,7 +435,7 @@ function menu_customizer_available_items_template() {
 				</p>
 			</div>
 		</div>
-		<div id="available-menu-items-search" class="accordion-section open"><?php // @todo not open by default (opens on input in search field) ?>
+		<div id="available-menu-items-search" class="accordion-section">
 			<div class="accordion-section-title">
 				<label class="screen-reader-text" for="menu-items-search"><?php _e( 'Search Menu Items' ); ?></label>
 				<input type="search" id="menu-items-search" placeholder="<?php esc_attr_e( 'Search menu items&hellip;' ) ?>" />
