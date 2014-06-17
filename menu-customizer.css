@@ -500,13 +500,18 @@
 	display: none;
 }
 
+#available-menu-items .accordion-section-content {
+	border-top: 1px solid #eee;
+	padding: 15px;
+}
+
 #available-menu-items-search input {
 	padding: 6px 10px;
 	width: 100%;
 }
 
 #available-menu-items-search .accordion-section-content {
-	padding: 1px 15px 12px 15px;
+	padding: 15px;
 }
 
 #available-menu-items .item-tpl {
