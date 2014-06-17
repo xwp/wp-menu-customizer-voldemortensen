@@ -50,26 +50,41 @@ function menu_customizer_enqueue() {
 		<div id="menu-item-tpl-{{ data.id }}" class="menu-item-tpl" data-menu-item-id="{{ data.id }}">
 			<dl class="menu-item-bar">
 				<dt class="menu-item-handle">
-					<span class="item-type">{{ data.type }}</span>
-					<span class="item-title">{{ data.title }}</span>
+					<span class="item-type">{{ data.type_label }}</span>
+					<span class="item-title">{{ data.name }}</span>
 					<a class="item-add" href="#">Add Menu Item</a>
 				</dt>
 			</dl>
 		</div>';
 
+	$loading_item_tpl = '
+		<li class="nav-menu-inserted-item-loading adding-dbid-{{ data.id }} customize-control customize-control-menu_item nav-menu-item-wrap">
+			<div class="menu-item menu-item-depth-0 menu-item-edit-inactive">
+				<dl class="menu-item-bar">
+					<dt class="menu-item-handle">
+						<span class="spinner" style="display: block;"></span>
+						<span class="item-type">{{ data.type }}</span>
+						<span class="item-title menu-item-title">{{ data.name }}</span>
+					</dt>
+				</dl>
+			</div>
+		</li>';
+
 	global $wp_scripts;
 
 	// Pass data to JS.
 	$settings = array(
-		'nonce'              => wp_create_nonce( 'update-menu-item' ),
+		'nonce'              => wp_create_nonce( 'customize-menu-item' ),
 		'allMenus'           => wp_get_nav_menus(),
 		'availableMenuItems' => menu_customizer_available_items(),
+		'itemTypes'          => menu_customizer_available_item_types(),
 		'l10n'               => array(
 			'untitled' => _x('(no label)', 'missing menu item navigation label'),
 		),
 		'tpl'                => array(
-			'menuitemReorderNav' => $menuitem_reorder_nav_tpl,
-			'availableMenuItem'  => $available_item_tpl,
+			'menuitemReorderNav'  => $menuitem_reorder_nav_tpl,
+			'availableMenuItem'   => $available_item_tpl,
+			'loadingItemTemplate' => $loading_item_tpl,
 		),
 	);
 
@@ -90,10 +105,11 @@ function menu_customizer_customize_register( $wp_customize ) {
 
 	// Create a super-section/page for Menus.
 	// @see https://core.trac.wordpress.org/ticket/27406
-	// @requires https://core.trac.wordpress.org/attachment/ticket/27406/27406.1.diff
+	// @requires https://core.trac.wordpress.org/attachment/ticket/27406/27406.2.diff
 	if ( method_exists( 'WP_Customize_Manager', 'add_page' ) ) {
 		$wp_customize->add_page( 'menus', array( 
 			'title' => __( 'Menus' ),
+			'description' => __( '<p>This screen is used for managing your custom navigation menus.</p><p>Menus can be displayed in locations defined by your theme, even used in sidebars by adding a “Custom Menu” widget on the Widgets screen.</p>' ),
 		) );
 	}
 
@@ -327,10 +343,12 @@ function menu_customizer_available_items() {
 			$allposts = get_posts( $args );
 			foreach ( $allposts as $post ) {
 				$items[] = array(
-					'id'       => $post->ID,
-					'name'     => $post->post_title,
-					'type'     => $post_type->name,
-					'obj_type' => 'post',
+					'id'         => $post->ID,
+					'name'       => $post->post_title,
+					'type'       => $post_type->name,
+					'type_label' => $post_type->labels->singular_name,
+					'obj_type'   => 'post',
+					'order'      => strtotime( $post->post_modified ), // Posts are orderd by time updated.
 				);
 			}
 		}
@@ -358,10 +376,12 @@ function menu_customizer_available_items() {
 
 				foreach ( $terms as $term ) {
 					$items[] = array(
-						'id'       => $term->term_id,
-						'name'     => $term->name,
-						'type'     => $name,
-						'obj_type' => 'taxonomy',
+						'id'         => $term->term_id,
+						'name'       => $term->name,
+						'type'       => $name,
+						'type_label' => $tax->labels->singular_name,
+						'obj_type'   => 'taxonomy',
+						'order'       => $term->count, // Terms are ordered by count; will always be after all posts when combined.
 					);
 				}
 			}
@@ -370,14 +390,22 @@ function menu_customizer_available_items() {
 
 	// Add "Home" link. Treat as a page, but switch to custom on add.
 	$home = array(
-		'id'       => 0,
-		'name'     => __( 'Home' ),
-		'type'     => 'page',
-		'obj_type' => 'custom',
+		'id'         => 0,
+		'name'       => __( 'Home' ),
+		'type'       => 'page',
+		'type_label' => __( 'Page' ),
+		'obj_type'   => 'custom',
+		'order'      => time(), // Will be the first item.
 	);
 	$items[] = $home;
 
 	return $items;
+}
+
+function menu_customizer_available_item_types() {
+	$types = get_post_types( array( 'show_in_nav_menus' => true ), 'names' );
+	$taxes = get_taxonomies( array( 'show_in_nav_menus' => true ), 'names' );
+	return array_merge( $types, $taxes );
 }
 
 function menu_customizer_available_items_template() {
@@ -401,12 +429,12 @@ function menu_customizer_available_items_template() {
 				<p id="menu-item-name-wrap">
 					<label class="howto" for="custom-menu-item-name">
 						<span>Link Text</span>
-						<input id="custom-menu-item-name" name="menu-item[-92][menu-item-title]" type="text" class="regular-text menu-item-textbox">
+						<input id="custom-menu-item-name" name="menu-item[-92][menu-item-title]" type="text" class="regular-text menu-item-textbox input-with-default-title" title="Menu Item">
 					</label>
 				</p>
 				<p class="button-controls">
 					<span class="add-to-menu">
-						<input type="submit" class="button-secondary submit-add-to-menu right" value="Add to Menu" name="add-custom-menu-item" id="submit-customlinkdiv">
+						<input type="submit" class="button-secondary submit-add-to-menu right" value="Add to Menu" name="add-custom-menu-item" id="custom-menu-item-submit">
 						<span class="spinner"></span>
 					</span>
 				</p>
@@ -417,16 +445,7 @@ function menu_customizer_available_items_template() {
 				<label class="screen-reader-text" for="menu-items-search"><?php _e( 'Search Menu Items' ); ?></label>
 				<input type="search" id="menu-items-search" placeholder="<?php esc_attr_e( 'Search menu items&hellip;' ) ?>" />
 			</div>
-			<div class="accordion-section-content"><?php // @todo don't need template here. ?>
-				<div id="menu-item-tpl-$id" class="menu-item-tpl" data-menu-item-id="$id">
-					<dl class="menu-item-bar">
-						<dt class="menu-item-handle">
-							<span class="item-type">Custom</span>
-							<span class="item-title">Home</span>
-							<a class="item-add" href="#">Add Menu Item</a>
-						</dt>
-					</dl>
-				</div>
+			<div class="accordion-section-content">
 			</div>
 		</div>
 		<?php

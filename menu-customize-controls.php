@@ -37,6 +37,8 @@ class WP_Menu_Customize_Control extends WP_Customize_Control {
 			<?php _e( 'Add Links' ); ?>
 		</span>
 
+		<span class="add-menu-item-loading spinner"></span>
+
 		<span class="reorder-toggle" tabindex="0">
 			<span class="reorder"><?php _ex( 'Reorder', 'Reorder menu items in Customizer' ); ?></span>
 			<span class="reorder-done"><?php _ex( 'Done', 'Cancel reordering menu items in Customizer'  ); ?></span>

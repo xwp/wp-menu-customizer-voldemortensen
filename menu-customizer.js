@@ -48,7 +48,9 @@
 		id: null,
 		name: null,
 		type: null,
+		type_label: null,
 		obj_type: null,
+		date: null,
 	});
 
 	/**
@@ -61,6 +63,17 @@
 	 */
 	api.Menus.AvailableItemCollection = Backbone.Collection.extend({
 		model: api.Menus.AvailableItemModel,
+
+		sort_key: 'order',
+
+		comparator: function( item ) {
+			return -item.get( this.sort_key );
+		},
+
+		sortByField: function( fieldName ) {
+			this.sort_key = fieldName;
+			this.sort();
+		},
 
 		// Controls searching on the current menu item collection.
 		doSearch: function( value ) {
@@ -102,55 +115,12 @@
 			match = new RegExp( '^(?=.*' + term + ').+', 'i' );
 
 			this.each( function ( data ) {
-				haystack = [ data.get( 'title' ), data.get( 'type' ) ].join( ' ' );
+				haystack = data.get( 'title' );
 				data.set( 'search_matched', match.test( haystack ) );
 			} );
 		}
 	});
 	api.Menus.availableMenuItems = new api.Menus.AvailableItemCollection( api.Menus.data.availableMenuItems );
-
-	// This is the view that controls each available menu item.
-	api.Menus.availableItemView = wp.Backbone.View.extend({
-		el: '#available-menu-items-search .accordion-section-content',
-
-		// Wrap data in a div.available-menu-item element.
-		className: 'available-menu-item',
-
-		// The HTML template for each element to be rendered.
-		html: null,
-
-		events: {
-			'click': 'add',
-			'keydown': 'add',
-			'touchend': 'add',
-			'keyup': 'addFocus',
-			'touchmove': 'add'
-		},
-
-		render: function() {
-			var self = this,
-				tpls = '',
-				collection = this.collection.toJSON();
-			
-			_.templateSettings = {
-				interpolate: /\{\{(.+?)\}\}/g
-			};
-			this.html = _.template( api.Menus.data.tpl.availableMenuItem ),
-
-			// Render items using the html template. @todo this is wrong.
-//			_.each(collection, function( data ) {
-//				tpls += self.html( data );
-//			});
-			this.$el.html( tpls ).attr({
-				tabindex: 0
-			});
-		},
-
-		// Add the menu item.
-		add: function() {
-			// @todo
-		},
-	});
 
 	/**
 	 * wp.customize.Menus.MenuModel
@@ -198,6 +168,9 @@
 			'focus .menu-item-tpl' : 'focus',
 			'click .menu-item-tpl' : '_submit',
 			'keypress .menu-item-tpl' : '_submit',
+			'click #custom-menu-item-submit' : '_submitLink',
+			'keypress #custom-menu-item-submit' : '_submitLink',
+			'keypress #custom-menu-item-name' : '_submitLink',
 			'keydown' : 'keyboardAccessible'
 		},
 
@@ -207,9 +180,12 @@
 		// Cache menu control that opened the panel.
 		currentMenuControl: null,
 		$search: null,
+		rendered: false,
 
 		initialize: function() {
 			var self = this;
+
+			this.toggleLoading(true);
 
 			this.$search = $( '#menu-items-search' );
 
@@ -217,7 +193,12 @@
 
 			this.listenTo( this.collection, 'change', this.updateList );
 
-			this.initList();
+			this.collection.sortByField( 'order' );
+
+			if ( ! this.rendered ) {
+				this.initList();
+				this.rendered = true;
+			}
 			this.updateList();
 
 			// If the available menu items panel is open and the customize controls are
@@ -233,6 +214,12 @@
 
 			// Close the panel if the URL in the preview changes
 			api.Menus.Previewer.bind( 'url', this.close );
+
+			this.toggleLoading(false);
+		},
+
+		toggleLoading: function( tf ) {
+			$( '.add-menu-item-loading' ).toggle( tf );
 		},
 
 		// Performs a search and handles selected menu item.
@@ -264,24 +251,36 @@
 
 		// Render the individual items.
 		initList: function() {
-	// Set up the view
-//	api.Menus.availableItemsView = api.Menus.availableItemView({
-//		collection: api.Menus.availableMenuItems
-//	});
-//	api.Menus.availableItemsView.render();
-			var itemView = new api.Menus.availableItemView({
-				collection: api.Menus.availableMenuItems
+			var searchInner = $( '#available-menu-items-search .accordion-section-content' ),
+				self = this,
+				itemTemplate;
+			_.templateSettings = {
+				interpolate: /\{\{(.+?)\}\}/g
+			};
+			itemTemplate = _.template( api.Menus.data.tpl.availableMenuItem );
+
+			// Render the template for each menu item in the search section.
+			self.collection.each( function( menu_item ) {
+				searchInner.append( itemTemplate({ data: menu_item.attributes }) );
 			});
-			itemView.render();
-	
+			
+			// Render the template for each item by type.
+			$.each( api.Menus.data.itemTypes, function( index, type ) {
+				var items = self.collection.where({ type: type }),
+					items = new api.Menus.AvailableItemCollection( items ),
+					typeInner = $( '#available-menu-items-' + type + ' .accordion-section-content' );
+				items.each( function( menu_item ) {
+					typeInner.append( itemTemplate({ data: menu_item.attributes }) );					
+				} );
+			} );
 		},
-		
+
 		// Changes visibility of available menu items.
 		updateList: function() {
 			this.collection.each( function( menu_item ) {
 				var menuitemTpl = $( '#menu-item-tpl-' + menu_item.id );
-				menuitemTpl.toggle( menu_item.get( 'search_matched' ) && ! menu_item.get( 'is_disabled' ) );
-				if ( menu_item.get( 'is_disabled' ) && menuitemTpl.is( this.selected ) ) {
+				menuitemTpl.toggle( menu_item.get( 'search_matched' ) );
+				if ( ! menu_item.get( 'search_matched' ) && menuitemTpl.is( this.selected ) ) {
 					this.selected = null;
 				}
 			} );
@@ -329,11 +328,39 @@
 				return;
 			}
 
-			this.currentMenuControl.addMenuItem( menuitemId );
+			this.currentMenuControl.addItemToMenu( menu_item.attributes );
+		},
+
+
+		// Submit handler for keypress and click on custom menu item.
+		_submitLink: function( event ) {
+			// Only proceed with keypress if it is Enter or Spacebar
+			if ( event.type === 'keypress' && ( event.which !== 13 && event.which !== 32 ) ) {
+				return;
+			}
+
+			this.submitLink( $( event.currentTarget ) );
+		},
+
+		// Adds the custom menu item to the menu.
+		submitLink: function() {
+			var  menu_item;
+			if ( this.currentMenuControl ) {
+				return;
+			}
+
+			menu_item = {
+				'id': 0,
+				'name': $( 'custom-menu-item-name' ).val(),
+				'url': $( 'custom-menu-item-url').val(),
+			};
+
+			this.currentMenuControl.addItemtoMenu( menu_item );
 		},
 
 		// Opens the panel.
 		open: function( menuControl ) {
+			this.toggleLoading(true);
 			this.currentMenuControl = menuControl;
 
 			$( 'body' ).addClass( 'adding-menu-items' );
@@ -354,6 +381,7 @@
 			this.collection.doSearch( '' );
 
 			this.$search.focus();
+			this.toggleLoading(false);
 		},
 
 		// Closes the panel
@@ -881,7 +909,7 @@
 					var menuControl = api.Menus.getMenuControlContainingItem( menuItemId );
 
 					if ( ! menuControl ) {
-						menuControl = self.addMenuItem( menuItemId );
+						menuControl = self.addMenuItem( menuItemId ); // @todo why?
 					}
 
 					return menuControl;
@@ -1055,20 +1083,60 @@
 		},
 
 		/**
-		 * @param {string} itemObjectId
+		 * Add a new item to this menu.
+		 *
+		 * @param {int} itemObjectId
 		 * @returns {object|false} menu_item control instance, or false on error
 		 */
-		addMenuItem: function( itemObjectId ) {
+		addItemToMenu: function( item, callback ) {
 			// @TODO
 
 			// Create the new menu item object via ajax. Use a menu id of 0, so that it is saved as an orphaned draft; then apply the menu id in the JS after it comes back, so that that data is saved in an option and eventually updated later.
 			// Should only need to give it the menu id (0) and object id, the rest will be populated w/ the defaults.
 			// Unless it's a custom link, in which case pass the title and url.
-			// In the ajax function, will just need to call wp_update_nav_menu_item.
+			// In the ajax function, do similar to existing add menu item ajax.
 			
 			// Get the control html back from the ajax call and render it in a new control at the bottom of the appropriate menu.
 			
 			// Register the new control & setting in JS.
+			
+			// Trigger the customizer `processing` state during this process so that saving is disabled.
+			
+			var params,
+				menuControl = $( '#customize-control-nav_menus-' + this.params.menu_id + '-controls' );
+
+			_.templateSettings = {
+				interpolate: /\{\{(.+?)\}\}/g
+			};
+			placeholderTemplate = _.template( api.Menus.data.tpl.loadingItemTemplate );
+
+			// Insert a placeholder menu item into the menu.
+			menuControl.before( placeholderTemplate({ data: item }) );
+
+			callback = callback || function(){};
+
+			params = {
+				'action': 'add-menu-item-customizer',
+				'menu': 0, // Use menu id of 0 to create an orphaned draft - will be published and assigned on save.
+				'customize-menu-item-nonce': api.Menus.data.nonce,
+				'menu-item': item
+			};
+
+			$.post( ajaxurl, params, function( menuItemMarkup ) {
+				var ins = $('#menu-instructions');
+
+				menuItemMarkup = $.trim( menuMarkup ); // Trim leading whitespaces
+				processMethod(menuMarkup, params);
+
+				// Make it stand out a bit more visually, by adding a fadeIn
+				$( 'li.pending' ).hide().fadeIn('slow');
+				$( '.drag-instructions' ).show();
+				if( ! ins.hasClass( 'menu-instructions-inactive' ) && ins.siblings().length )
+					ins.addClass( 'menu-instructions-inactive' );
+
+				callback();
+			});
+			
 		}
 	} );
 
