@@ -472,7 +472,6 @@
 		 */
 		ready: function() {
 			this._setupModel();
-			this._setupUIPreviewing();
 			this._setupControlToggle();
 			this._setupReorderUI();
 			this._setupUpdateUI();
@@ -501,23 +500,6 @@
 			this.setting.bind( function( to, from ) {
 				if ( ! _( from ).isEqual( to ) && ! self.isMenuItemUpdating ) {
 					self.updateMenuItem( { instance: to } );
-				}
-			} );
-		},
-
-		// Update the item handle title when the navigation label is changed.
-		_setupUIPreviewing : function() {
-			$( 'body' ).on( 'input', '.edit-menu-item-title', function(e) { 
-				var input = $( e.currentTarget ), title, titleEl;
-				title = input.val();
-				titleEl = input.closest( '.menu-item' ).find( '.menu-item-title' );
-				// Don't update to empty title.
-				if ( title ) {
-					titleEl.text( title )
-					       .removeClass( 'no-title' );
-				} else {
-					titleEl.text( api.Menus.data.l10n.untitled )
-					       .addClass( 'no-title' );
 				}
 			} );
 		},
@@ -1247,20 +1229,33 @@
 	}
 
 	/**
-	 * Update Section Title as menu name is changed.
+	 * Update Section Title as menu name is changed and item handle title when label is changed.
 	 */
-	function setupMenuNameUpdating() {
+	function setupUIPreviewing() {
 		$( '#accordion-section-menus' ).on( 'input', '.customize-control-text input', function(e) {
 			var el = $( e.currentTarget ),
 				name = el.val(),
 				title = el.closest( '.accordion-section' ).find( '.accordion-section-title' );
-			// Empty names are not allowed, don't update to one.
+			// Empty names are not allowed (will not be saved), don't update to one.
 			if ( name ) {
 				title.html( name );
 			}
 		} );
+		$( '#accordion-section-menus' ).on( 'input', '.edit-menu-item-title', function(e) { 
+			var input = $( e.currentTarget ), title, titleEl;
+			title = input.val();
+			titleEl = input.closest( '.menu-item' ).find( '.menu-item-title' );
+			// Don't update to empty title.
+			if ( title ) {
+				titleEl.text( title )
+				       .removeClass( 'no-title' );
+			} else {
+				titleEl.text( api.Menus.data.l10n.untitled )
+				       .addClass( 'no-title' );
+			}
+		} );
 	}
 
-	$(document).ready(function(){ setupMenuNameUpdating(); });
+	$(document).ready(function(){ setupUIPreviewing(); });
 
 })( window.wp, jQuery );
