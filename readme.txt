@@ -17,17 +17,17 @@ Several improvements to both Menus and the Theme Customizer are also in the work
 
 Menus
 
-* <a href="https://core.trac.wordpress.org/ticket/23076">#23076</a>: Update menu item title when editing menu item label ''[committed to WordPress 4.0 alpha]''
-* <a href="https://core.trac.wordpress.org/ticket/13273">#13273</a>: Core support & UI for Placeholder Menu Items ''[awaiting review, needs feedback]''
-* <a href="https://core.trac.wordpress.org/ticket/28138">#28138</a>: Updating menu item requires passing all of a menu item's data to wp_update_nav_menu_item() ''[awaiting review, to  become required]''
+* <a href="https://core.trac.wordpress.org/ticket/23076">#23076</a>: Update menu item title when editing menu item label **[committed to WordPress 4.0 alpha]**
+* <a href="https://core.trac.wordpress.org/ticket/13273">#13273</a>: Core support & UI for Placeholder Menu Items **[awaiting review, needs feedback]**
+* <a href="https://core.trac.wordpress.org/ticket/28138">#28138</a>: Updating menu item requires passing all of a menu item's data to wp_update_nav_menu_item() **[awaiting review, to  become required]**
 
 Customizer
 
-* <a href="https://core.trac.wordpress.org/ticket/27406">#27506</a>: Introduce Customizer "Pages", Organize all widget area sections into a customizer page ''[AWAITING FEEDBACK/REVIEW, REQUIRED]''
-* <a href="https://core.trac.wordpress.org/ticket/27979">#27979</a>: Pass Customizer Setting instance to `customize_update_` and `customize_preview_` actions ''[scheduled for WordPress 4.0, awaiting commit, REQUIRED]''
-* <a href="https://core.trac.wordpress.org/ticket/28477">#28477</a>: New Built-in Customizer Control Types ''[awaiting review]''
-* <a href="https://core.trac.wordpress.org/ticket/27981">#27981</a>: Support descriptions for Customizer Controls ''[scheduled for WordPress 4.0]''
-* <a href="https://core.trac.wordpress.org/ticket/28504">#28504</a>: Icons for Customizer Sections ''[awaiting review]''
+* <a href="https://core.trac.wordpress.org/ticket/27406">#27506</a>: Introduce Customizer "Pages", Organize all widget area sections into a customizer page **[AWAITING FEEDBACK/REVIEW, REQUIRED]**
+* <a href="https://core.trac.wordpress.org/ticket/27979">#27979</a>: Pass Customizer Setting instance to `customize_update_` and `customize_preview_` actions **[scheduled for WordPress 4.0, awaiting commit, REQUIRED]**
+* <a href="https://core.trac.wordpress.org/ticket/28477">#28477</a>: New Built-in Customizer Control Types **[awaiting review]**
+* <a href="https://core.trac.wordpress.org/ticket/27981">#27981</a>: Support descriptions for Customizer Controls **[scheduled for WordPress 4.0]**
+* <a href="https://core.trac.wordpress.org/ticket/28504">#28504</a>: Icons for Customizer Sections **[awaiting review]**
 
 
 == Installation ==
