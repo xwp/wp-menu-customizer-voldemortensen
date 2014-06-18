@@ -265,7 +265,7 @@
 			self.collection.each( function( menu_item ) {
 				searchInner.append( itemTemplate({ data: menu_item.attributes }) );
 			});
-			
+
 			// Render the template for each item by type.
 			$.each( api.Menus.data.itemTypes, function( index, type ) {
 				var items = self.collection.where({ type: type }),
@@ -346,21 +346,29 @@
 
 		// Adds the custom menu item to the menu.
 		submitLink: function() {
-			var  menu_item;
+			var menu_item,
+				item_name = $( '#custom-menu-item-name' ),
+				item_url = $( '#custom-menu-item-url' );
+
 			if ( ! this.currentMenuControl ) {
 				return;
 			}
 
 			menu_item = {
 				'id': 0,
-				'name': $( '#custom-menu-item-name' ).val(),
-				'url': $( '#custom-menu-item-url').val(),
+				'name': item_name.val(),
+				'url': item_url.val(),
 				'type': 'custom',
 				'type_label': api.Menus.data.l10n.custom_label,
 				'obj_type': 'custom'
 			};
 
 			this.currentMenuControl.addItemToMenu( menu_item );
+
+			// Reset the custom link form.
+			// @todo: decide whether this should be done as a callback after adding the item, as it is in nav-menu.js.
+			item_url.val( 'http://' );
+			item_name.val( '' );
 		},
 
 		// Opens the panel.
