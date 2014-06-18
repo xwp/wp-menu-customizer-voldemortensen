@@ -343,7 +343,7 @@ function menu_customizer_available_items() {
 			$allposts = get_posts( $args );
 			foreach ( $allposts as $post ) {
 				$items[] = array(
-					'id'         => $post->ID,
+					'id'         => 'post-' . $post->ID,
 					'name'       => $post->post_title,
 					'type'       => $post_type->name,
 					'type_label' => $post_type->labels->singular_name,
@@ -376,7 +376,7 @@ function menu_customizer_available_items() {
 
 				foreach ( $terms as $term ) {
 					$items[] = array(
-						'id'         => $term->term_id,
+						'id'         => 'term-' . $term->term_id,
 						'name'       => $term->name,
 						'type'       => $name,
 						'type_label' => $tax->labels->singular_name,
