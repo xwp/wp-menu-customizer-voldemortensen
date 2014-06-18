@@ -353,8 +353,11 @@
 
 			menu_item = {
 				'id': 0,
-				'name': $( 'custom-menu-item-name' ).val(),
-				'url': $( 'custom-menu-item-url').val(),
+				'name': $( '#custom-menu-item-name' ).val(),
+				'url': $( '#custom-menu-item-url').val(),
+				'type': 'custom',
+				'type_label': api.Menus.data.l10n.custom_label,
+				'obj_type': 'custom'
 			};
 
 			this.currentMenuControl.addItemToMenu( menu_item );

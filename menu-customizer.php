@@ -63,7 +63,7 @@ function menu_customizer_enqueue() {
 				<dl class="menu-item-bar">
 					<dt class="menu-item-handle">
 						<span class="spinner" style="display: block;"></span>
-						<span class="item-type">{{ data.type }}</span>
+						<span class="item-type">{{ data.type_label }}</span>
 						<span class="item-title menu-item-title">{{ data.name }}</span>
 					</dt>
 				</dl>
@@ -79,7 +79,8 @@ function menu_customizer_enqueue() {
 		'availableMenuItems' => menu_customizer_available_items(),
 		'itemTypes'          => menu_customizer_available_item_types(),
 		'l10n'               => array(
-			'untitled' => _x('(no label)', 'missing menu item navigation label'),
+			'untitled'     => _x( '(no label)', 'Missing menu item navigation label.' ),
+			'custom_label' => _x( 'Custom', 'Custom menu item type label.' ),
 		),
 		'tpl'                => array(
 			'menuitemReorderNav'  => $menuitem_reorder_nav_tpl,
