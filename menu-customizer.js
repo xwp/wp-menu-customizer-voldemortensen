@@ -171,7 +171,6 @@
 			'click .menu-item-tpl' : '_submit',
 			'keypress .menu-item-tpl' : '_submit',
 			'click #custom-menu-item-submit' : '_submitLink',
-			'keypress #custom-menu-item-submit' : '_submitLink',
 			'keypress #custom-menu-item-name' : '_submitLink',
 			'keydown' : 'keyboardAccessible'
 		},
@@ -336,12 +335,12 @@
 
 		// Submit handler for keypress and click on custom menu item.
 		_submitLink: function( event ) {
-			// Only proceed with keypress if it is Enter or Spacebar
-			if ( event.type === 'keypress' && ( event.which !== 13 && event.which !== 32 ) ) {
+			// Only proceed with keypress if it is Enter.
+			if ( event.type === 'keypress' && ( event.which !== 13 ) ) {
 				return;
 			}
 
-			this.submitLink( $( event.currentTarget ) );
+			this.submitLink();
 		},
 
 		// Adds the custom menu item to the menu.
@@ -351,6 +350,10 @@
 				item_url = $( '#custom-menu-item-url' );
 
 			if ( ! this.currentMenuControl ) {
+				return;
+			}
+
+			if ( '' === item_name.val() || '' === item_url.val() || 'http://' == item_url.val() ) {
 				return;
 			}
 
