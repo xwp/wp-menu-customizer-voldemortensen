@@ -347,7 +347,7 @@
 		// Adds the custom menu item to the menu.
 		submitLink: function() {
 			var  menu_item;
-			if ( this.currentMenuControl ) {
+			if ( ! this.currentMenuControl ) {
 				return;
 			}
 
@@ -357,7 +357,7 @@
 				'url': $( 'custom-menu-item-url').val(),
 			};
 
-			this.currentMenuControl.addItemtoMenu( menu_item );
+			this.currentMenuControl.addItemToMenu( menu_item );
 		},
 
 		// Opens the panel.
