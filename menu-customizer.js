@@ -1098,7 +1098,8 @@
 			
 			var params,
 				placeholderContainer,
-				menuControl = $( '#customize-control-nav_menus-' + this.params.menu_id + '-controls' );
+				menuId = this.params.menu_id,
+				menuControl = $( '#customize-control-nav_menus-' + menuId + '-controls' );
 
 			_.templateSettings = {
 				interpolate: /\{\{(.+?)\}\}/g
@@ -1114,7 +1115,7 @@
 
 			params = {
 				'action': 'add-menu-item-customizer',
-				'menu': this.params.menu_id,
+				'menu': menuId,
 				'customize-menu-item-nonce': api.Menus.data.nonce,
 				'menu-item': item
 			};
@@ -1123,9 +1124,12 @@
 				var ins = $('#menu-instructions');
 
 				menuItemMarkup = $.trim( menuItemMarkup ); // Trim leading whitespaces.
+				dbid = $( menuItemMarkup ).first( '.menu-item' ).attr( 'id' );
+				dbid = dbid.replace( 'menu-item-', '' );
 
 				// Replace the placeholder with the markup.
 				placeholderContainer.html( menuItemMarkup )
+									.attr( 'id', 'customize-control-nav_menus-' + menuId + '-' + dbid )
 									.removeClass( 'nav-menu-inserted-item-loading' );
 
 				// Make it stand out a bit more visually, by adding a fadeIn.
