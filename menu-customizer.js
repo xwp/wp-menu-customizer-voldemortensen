@@ -1096,11 +1096,8 @@
 			
 			// Get the control html back from the ajax call and render it in a new control at the bottom of the appropriate menu.
 			
-			// Register the new control & setting in JS.
-			
-			// Trigger the customizer `processing` state during this process so that saving is disabled.
-			
 			var params,
+				placeholderContainer,
 				menuControl = $( '#customize-control-nav_menus-' + this.params.menu_id + '-controls' );
 
 			_.templateSettings = {
@@ -1111,11 +1108,13 @@
 			// Insert a placeholder menu item into the menu.
 			menuControl.before( placeholderTemplate({ data: item }) );
 
+			placeholderContainer = menuControl.prev( '.nav-menu-inserted-item-loading' );
+
 			callback = callback || function(){};
 
 			params = {
 				'action': 'add-menu-item-customizer',
-				'menu': 0, // Use menu id of 0 to create an orphaned draft - will be published and assigned on save.
+				'menu': this.params.menu_id,
 				'customize-menu-item-nonce': api.Menus.data.nonce,
 				'menu-item': item
 			};
@@ -1123,14 +1122,18 @@
 			$.post( ajaxurl, params, function( menuItemMarkup ) {
 				var ins = $('#menu-instructions');
 
-				menuItemMarkup = $.trim( menuMarkup ); // Trim leading whitespaces
-				processMethod(menuMarkup, params);
+				menuItemMarkup = $.trim( menuItemMarkup ); // Trim leading whitespaces.
 
-				// Make it stand out a bit more visually, by adding a fadeIn
-				$( 'li.pending' ).hide().fadeIn('slow');
-				$( '.drag-instructions' ).show();
-				if( ! ins.hasClass( 'menu-instructions-inactive' ) && ins.siblings().length )
-					ins.addClass( 'menu-instructions-inactive' );
+				// Replace the placeholder with the markup.
+				placeholderContainer.html( menuItemMarkup )
+									.removeClass( 'nav-menu-inserted-item-loading' );
+
+				// Make it stand out a bit more visually, by adding a fadeIn.
+				placeholderContainer.hide().fadeIn('slow');
+
+				// Register the new control & setting in JS.
+
+				// Trigger the customizer `processing` state during this process so that saving is disabled.
 
 				callback();
 			});

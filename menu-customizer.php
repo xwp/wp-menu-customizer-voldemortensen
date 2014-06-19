@@ -28,6 +28,10 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 =====================================================================================
 */
 
+if ( is_admin() && defined( 'DOING_AJAX' ) && DOING_AJAX ) {
+	require_once( plugin_dir_path( __FILE__ ) . '/menu-customize-ajax.php' );
+}
+
 /**
  * Enqueue sripts and styles.
  *
@@ -58,7 +62,7 @@ function menu_customizer_enqueue() {
 		</div>';
 
 	$loading_item_tpl = '
-		<li class="nav-menu-inserted-item-loading adding-dbid-{{ data.id }} customize-control customize-control-menu_item nav-menu-item-wrap">
+		<li class="nav-menu-inserted-item-loading added-dbid-{{ data.id }} customize-control customize-control-menu_item nav-menu-item-wrap">
 			<div class="menu-item menu-item-depth-0 menu-item-edit-inactive">
 				<dl class="menu-item-bar">
 					<dt class="menu-item-handle">
@@ -74,7 +78,7 @@ function menu_customizer_enqueue() {
 
 	// Pass data to JS.
 	$settings = array(
-		'nonce'              => wp_create_nonce( 'customize-menu-item' ),
+		'nonce'              => wp_create_nonce( 'customize-menus' ),
 		'allMenus'           => wp_get_nav_menus(),
 		'availableMenuItems' => menu_customizer_available_items(),
 		'itemTypes'          => menu_customizer_available_item_types(),
@@ -348,7 +352,7 @@ function menu_customizer_available_items() {
 					'name'       => $post->post_title,
 					'type'       => $post_type->name,
 					'type_label' => $post_type->labels->singular_name,
-					'obj_type'   => 'post',
+					'obj_type'   => 'post_type',
 					'order'      => strtotime( $post->post_modified ), // Posts are orderd by time updated.
 				);
 			}
@@ -392,7 +396,7 @@ function menu_customizer_available_items() {
 	// Add "Home" link. Treat as a page, but switch to custom on add.
 	$home = array(
 		'id'         => 0,
-		'name'       => __( 'Home' ),
+		'name'       => _x( 'Home', 'nav menu home label' ),
 		'type'       => 'page',
 		'type_label' => __( 'Page' ),
 		'obj_type'   => 'custom',
@@ -479,3 +483,128 @@ function menu_customizer_available_items_template() {
 }
 add_action( 'customize_controls_print_footer_scripts','menu_customizer_available_items_template' );
 
+/**
+ * Render a single menu item control.
+ *
+ * @param Object $item The nav menu item to render.
+ * @param int $menu_id The item's menu id.
+ * @param int $depth The depth of the menu item.
+ */
+function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
+	$item_id = $item->ID;
+	$setting_id = 'nav_menus[' . $menu_id . '][' . $item_id .']';
+
+	$original_title = '';
+	if ( 'taxonomy' == $item->type ) {
+		$original_title = get_term_field( 'name', $item->object_id, $item->object, 'raw' );
+		if ( is_wp_error( $original_title ) ) {
+			$original_title = false;
+		}
+	} elseif ( 'post_type' == $item->type ) {
+		$original_object = get_post( $item->object_id );
+		$original_title = get_the_title( $original_object->ID );
+	}
+
+	$classes = array(
+		'menu-item menu-item-depth-' . $depth,
+		'menu-item-' . esc_attr( $item->object ),
+		'menu-item-edit-inactive',
+	);
+
+	$title = $item->title;
+	if ( ! empty( $item->_invalid ) ) {
+		$classes[] = 'menu-item-invalid';
+		/* translators: %s: title of menu item which is invalid */
+		$title = sprintf( __( '%s (Invalid)' ), $item->title );
+	} elseif ( isset( $item->post_status ) && 'draft' == $item->post_status ) {
+		$classes[] = 'pending';
+		/* translators: %s: title of menu item in draft status */
+		$title = sprintf( __('%s (Pending)'), $item->title );
+	}
+	$title = ( ! isset( $item->label ) || '' == $item->label ) ? $title : $item->label;
+
+	$submenu_text_style = '';
+	if ( 0 == $depth ) {
+		$submenu_text_style = 'style="display: none;"';
+	}
+
+	?>
+	<div id="menu-item-<?php echo $item_id; ?>" class="<?php echo implode(' ', $classes ); ?>">
+		<dl class="menu-item-bar">
+			<dt class="menu-item-handle">
+				<span class="item-type"><?php echo esc_html( $item->type_label ); ?></span>
+				<span class="item-title"><span class="menu-item-title"><?php echo esc_html( $title ); ?></span><span class="is-submenu" <?php echo $submenu_text_style; ?>><?php _e( 'sub item' ); ?></span></span>
+				<span class="item-controls">
+					<a class="item-edit" id="edit-<?php echo $item_id; ?>" title="<?php esc_attr_e('Edit Menu Item'); ?>" href="#"><?php _e( 'Edit Menu Item' ); ?></a>
+				</span>
+			</dt>
+		</dl>
+
+		<div class="menu-item-settings" id="menu-item-settings-<?php echo $item_id; ?>">
+			<?php if( 'custom' == $item->type ) : ?>
+				<p class="field-url description description-thin">
+					<label for="edit-menu-item-url-<?php echo $item_id; ?>">
+						<?php _e( 'URL' ); ?><br />
+						<input class="widefat code edit-menu-item-url" type="text" value="<?php echo esc_attr( $item->url ); ?>" id="edit-menu-item-url-<?php echo $item_id; ?>" name="<?php echo $setting_id; ?>[url]"  />
+					</label>
+				</p>
+			<?php endif; ?>
+			<p class="description description-thin">
+				<label for="edit-menu-item-title-<?php echo $item_id; ?>">
+					<?php _e( 'Navigation Label' ); ?><br />
+					<input type="text" id="edit-menu-item-title-<?php echo $item_id; ?>" class="widefat edit-menu-item-title" name="<?php echo $setting_id; ?>[title]" value="<?php echo esc_attr( $item->title ); ?>" />
+				</label>
+			</p>
+			<p class="field-link-target description description-thin">
+				<label for="edit-menu-item-target-<?php echo $item_id; ?>">
+					<input type="checkbox" id="edit-menu-item-target-<?php echo $item_id; ?>" value="_blank" name="menu-item-target"<?php checked( $item->target, '_blank' ); ?> />
+					<?php _e( 'Open link in a new tab' ); ?>
+				</label>
+			</p>
+			<p class="field-attr-title description description-thin">
+				<label for="edit-menu-item-attr-title-<?php echo $item_id; ?>">
+					<?php _e( 'Title Attribute' ); ?><br />
+					<input type="text" id="edit-menu-item-attr-title-<?php echo $item_id; ?>" class="widefat edit-menu-item-attr-title" name="menu-item-attr-title" value="<?php echo esc_attr( $item->attr_title ); ?>" />
+				</label>
+			</p>
+			<p class="field-css-classes description description-thin">
+				<label for="edit-menu-item-classes-<?php echo $item_id; ?>">
+					<?php _e( 'CSS Classes' ); ?><br />
+					<input type="text" id="edit-menu-item-classes-<?php echo $item_id; ?>" class="widefat code edit-menu-item-classes" name="menu-item-classes" value="<?php echo esc_attr( implode(' ', $item->classes ) ); ?>" />
+				</label>
+			</p>
+			<p class="field-xfn description description-thin">
+				<label for="edit-menu-item-xfn-<?php echo $item_id; ?>">
+					<?php _e( 'Link Relationship (XFN)' ); ?><br />
+					<input type="text" id="edit-menu-item-xfn-<?php echo $item_id; ?>" class="widefat code edit-menu-item-xfn" name="menu-item-xfn" value="<?php echo esc_attr( $item->xfn ); ?>" />
+				</label>
+			</p>
+			<p class="field-description description description-thin">
+				<label for="edit-menu-item-description-<?php echo $item_id; ?>">
+					<?php _e( 'Description' ); ?><br />
+					<textarea id="edit-menu-item-description-<?php echo $item_id; ?>" class="widefat edit-menu-item-description" rows="3" cols="20" name="menu-item-description"><?php echo esc_html( $item->description ); // textarea_escaped ?></textarea>
+					<span class="description"><?php _e('The description will be displayed in the menu if the current theme supports it.'); ?></span>
+				</label>
+			</p>
+
+			<div class="menu-item-actions description-thin submitbox">
+				<?php if( 'custom' != $item->type && $original_title !== false ) : ?>
+					<p class="link-to-original">
+						<?php printf( __('Original: %s'), '<a href="' . esc_attr( $item->url ) . '" target="_blank">' . esc_html( $original_title ) . '</a>' ); ?>
+					</p>
+				<?php endif; ?>
+				<a class="item-delete submitdelete deletion" id="delete-menu-item-<?php echo $item_id; ?>" href="#"><?php _e( 'Remove' ); ?></a>
+			</div>
+
+			<input class="menu-item-data-menu-id" type="hidden" name="menu-item-menu-id" value="<?php echo $menu_id; ?>" />
+			<input class="menu-item-data-db-id" type="hidden" name="menu-item-db-id" value="<?php echo $item_id; ?>" />
+			<input class="menu-item-data-object-id" type="hidden" name="menu-item-object-id" value="<?php echo esc_attr( $item->object_id ); ?>" />
+			<input class="menu-item-data-object" type="hidden" name="menu-item-object" value="<?php echo esc_attr( $item->object ); ?>" />
+			<input class="menu-item-data-parent-id" type="hidden" name="menu-item-parent-id" value="<?php echo esc_attr( $item->menu_item_parent ); ?>" />
+			<input class="menu-item-data-position" type="hidden" name="menu-item-position" value="<?php echo esc_attr( $item->menu_order ); ?>" />
+			<input class="menu-item-data-type" type="hidden" name="menu-item-type" value="<?php echo esc_attr( $item->type ); ?>" />
+		</div><!-- .menu-item-settings-->
+		<ul class="menu-item-transport"></ul>
+	</div>
+	<?php
+}
