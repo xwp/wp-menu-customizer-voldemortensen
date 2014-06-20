@@ -66,6 +66,11 @@ function menu_customizer_add_item_ajax() {
 		'menu-item-description' => ( isset( $menu_item_data['menu-item-description'] ) ? $menu_item_data['menu-item-description'] : '' ),
 	);
 
+	// `wp_save_nav_menu_items` requires `menu-item-db-id` to not be set for custom items.
+	if ( 'custom' == $item_data['menu-item-type'] ) {
+		unset( $item_data['menu-item-db-id'] );
+	}
+
 	$item_ids = wp_save_nav_menu_items( 0, array( 0 => $item_data ) );
 	if ( is_wp_error( $item_ids ) || empty( $item_ids ) ) {
 		wp_die( 0 );
