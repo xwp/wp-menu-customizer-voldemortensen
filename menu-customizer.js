@@ -1087,15 +1087,6 @@
 		 * @returns {object|false} menu_item control instance, or false on error
 		 */
 		addItemToMenu: function( item, callback ) {
-			// @TODO
-
-			// Create the new menu item object via ajax. Use a menu id of 0, so that it is saved as an orphaned draft; then apply the menu id in the JS after it comes back, so that that data is saved in an option and eventually updated later.
-			// Should only need to give it the menu id (0) and object id, the rest will be populated w/ the defaults.
-			// Unless it's a custom link, in which case pass the title and url.
-			// In the ajax function, do similar to existing add menu item ajax.
-			
-			// Get the control html back from the ajax call and render it in a new control at the bottom of the appropriate menu.
-			
 			var params,
 				placeholderContainer,
 				menuId = this.params.menu_id,
@@ -1125,6 +1116,11 @@
 
 				menuItemMarkup = $.trim( menuItemMarkup ); // Trim leading whitespaces.
 				dbid = $( menuItemMarkup ).first( '.menu-item' ).attr( 'id' );
+				if ( ! dbid ) {
+					// Something's wrong with the returned markup, bail.
+					placeholderContainer.fadeOut( 'slow', function() { $( this ).remove(); } );
+					return;
+				}
 				dbid = dbid.replace( 'menu-item-', '' );
 
 				// Replace the placeholder with the markup.
@@ -1135,9 +1131,9 @@
 				// Make it stand out a bit more visually, by adding a fadeIn.
 				placeholderContainer.hide().fadeIn('slow');
 
-				// Register the new control & setting in JS.
+				// @todo: Register the new control & setting in JS.
 
-				// Trigger the customizer `processing` state during this process so that saving is disabled.
+				// @todo: Trigger the customizer `processing` state during this process so that saving is disabled.
 
 				callback();
 			});
