@@ -62,7 +62,7 @@ function menu_customizer_enqueue() {
 		</div>';
 
 	$loading_item_tpl = '
-		<li class="nav-menu-inserted-item-loading added-dbid-{{ data.id }} customize-control customize-control-menu_item nav-menu-item-wrap">
+		<li class="nav-menu-inserted-item-loading added-menu-item added-dbid-{{ data.id }} customize-control customize-control-menu_item nav-menu-item-wrap">
 			<div class="menu-item menu-item-depth-0 menu-item-edit-inactive">
 				<dl class="menu-item-bar">
 					<dt class="menu-item-handle">
