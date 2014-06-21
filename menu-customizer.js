@@ -21,19 +21,13 @@
 	 */
 	api.Menus.MenuItemModel = Backbone.Model.extend({
 		id: null,
-		temp_id: null,
 		transport: 'refresh',
 		params: [],
-		search_matched: true,
 		menu_item_id: null,
 		menu_id: 0,
 		depth: 0,
 		position: 0,
-		temp_id: null,
-		label: null,
-		type: null,
-		obj_type: null,
-		search_matched: true
+		type: 'menu_item',
 	});
 
 	/**
@@ -1087,9 +1081,10 @@
 		 * @returns {object|false} menu_item control instance, or false on error
 		 */
 		addItemToMenu: function( item, callback ) {
-			var params,
+			var self = this,
+				params,
 				placeholderContainer,
-				menuId = this.params.menu_id,
+				menuId = self.params.menu_id,
 				menuControl = $( '#customize-control-nav_menus-' + menuId + '-controls' );
 
 			_.templateSettings = {
@@ -1112,7 +1107,7 @@
 			};
 
 			$.post( ajaxurl, params, function( menuItemMarkup ) {
-				var ins = $('#menu-instructions');
+				var dbid, settingId, settingArgs, controlConstructor, menuItemControl, menuItems;
 
 				menuItemMarkup = $.trim( menuItemMarkup ); // Trim leading whitespaces.
 				dbid = $( menuItemMarkup ).first( '.menu-item' ).attr( 'id' );
@@ -1123,17 +1118,54 @@
 				}
 				dbid = dbid.replace( 'menu-item-', '' );
 
-				// Replace the placeholder with the markup.
+				// Replace the placeholder with the control markup.
 				placeholderContainer.html( menuItemMarkup )
-									.attr( 'id', 'customize-control-nav_menus-' + menuId + '-' + dbid )
-									.removeClass( 'nav-menu-inserted-item-loading' );
+									.attr( 'id', 'customize-control-nav_menus-' + menuId + '-' + dbid );
 
 				// Make it stand out a bit more visually, by adding a fadeIn.
-				placeholderContainer.hide().fadeIn('slow');
+				//placeholderContainer.hide().fadeIn('slow');
 
-				// @todo: Register the new control & setting in JS.
+				// Register the new setting.
+				settingId = 'nav_menus[' + menuId + '][' + dbid + ']';
+				settingArgs = {
+					transport: 'refresh',
+					previewer: self.setting.previewer
+				};
+				api.create( settingId, settingId, {}, settingArgs );
+
+				// Register the new control.
+				controlConstructor = api.controlConstructor['menu_item'];
+				menuItemControl = new controlConstructor( settingId, {
+					params: {
+						settings: {
+							'default': settingId
+						},
+						menu_id: self.params.menu_id,
+						menu_item_id: dbid,
+						type: 'menu_item',
+						depth: 0,
+						position: self.setting._value.length
+					},
+					previewer: self.setting.previewer
+				} );
+				api.control.add( settingId, menuItemControl );
+
+				// Add item to this menu.
+				menuItems = self.setting().slice();
+				if ( -1 === _.indexOf( menuItems, dbid ) ) {
+					menuItems.push( dbid );
+					self.setting( menuItems );
+				}
 
 				// @todo: Trigger the customizer `processing` state during this process so that saving is disabled.
+
+				// Fade the new control in after the other processing is complete.
+				// @todo need to remove the class after .menu-itemm-handle exists, so that its animation works.
+				if ( placeholder.find( '.menu-item-handle' ) ) {
+					placeholderContainer.removeClass( 'nav-menu-inserted-item-loading' );
+				}
+
+				$( document ).trigger( 'menu-item-added', [ item ] );
 
 				callback();
 			});

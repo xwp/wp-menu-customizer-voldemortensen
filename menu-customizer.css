@@ -598,11 +598,6 @@ body.adding-menu-items #customize-preview {
 	opacity: 0.4;
 }
 
-.nav-menu-inserted-item-loading .menu-item-handle {
-	padding: 10px 15px 10px 8px;
-	cursor: default;
-}
-
 .nav-menu-inserted-item-loading .spinner {
 	float: left;
 	margin: 0 8px 0 0;
@@ -612,9 +607,21 @@ body.adding-menu-items #customize-preview {
 	padding: 0 0 0 8px;
 }
 
-.nav-menu-inserted-item-loading .menu-item-handle .item-title {
+
+.nav-menu-inserted-item-loading .menu-item-handle {
+	padding: 10px 15px 10px 8px;
+	cursor: default;
+	opacity: .5;
+	background: #fff;
 	color: #777;
 }
+
+.added-menu-item .menu-item-handle {
+	transition-property: opacity, background, color;
+	transition-duration: 1.25s;
+	transition-timing-function: cubic-bezier( .25, -2.5, .75, 8 ); /* Replacement for .hide().fadeIn('slow') in JS to add emphasis when it's loaded. */
+}
+
 
 /* Media queries */
 @media screen and (max-height: 700px) and (min-width: 981px) {
