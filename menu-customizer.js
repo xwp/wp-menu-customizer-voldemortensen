@@ -99,6 +99,7 @@
 		// @uses RegExp
 		// @todo: this algorithm is slow and doesn't work; also, sort results by relevance.
 		// (was based on widget filtering, which is an entirely different use-case).
+		// Maybe look at the internal links search methods for inspiration, per @nacin.
 		search: function( term ) {
 			var match, haystack;
 
@@ -1151,6 +1152,11 @@
 					previewer: self.setting.previewer
 				} );
 				api.control.add( settingId, menuItemControl );
+				// Make sure the panel hasn't been closed in the meantime.
+				if ( $( 'body' ).hasClass( 'adding-menu-items' ) ) {
+					// Move the delete button up to match the existing widgets.
+					api.Menus.getMenuItemControl( dbid ).toggleDeletePosition( true );
+				}
 
 				// Add item to this menu.
 				menuItems = self.setting().slice();
@@ -1257,14 +1263,14 @@
 		var foundControl = null;
 
 		api.control.each( function( control ) {
-			if ( control.params.type === 'menu_item' && control.params.widget_id === menuItemId ) {
+			if ( control.params.type === 'menu_item' && control.params.menu_item_id === menuItemId ) {
 				foundControl = control;
 			}
 		} );
 
 		return foundControl;
 	};
-	
+
 	/**
 	 * @param {String} menuItemId
 	 * @returns {String} settingId
