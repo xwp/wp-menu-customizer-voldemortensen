@@ -108,11 +108,11 @@ add_action( 'customize_controls_enqueue_scripts', 'menu_customizer_enqueue' );
 function menu_customizer_customize_register( $wp_customize ) {
 	require_once( plugin_dir_path( __FILE__ ) . '/menu-customize-controls.php' );
 
-	// Create a super-section/page for Menus.
+	// Create a panel for Menus.
 	// @see https://core.trac.wordpress.org/ticket/27406
-	// @requires https://core.trac.wordpress.org/attachment/ticket/27406/27406.2.diff
-	if ( method_exists( 'WP_Customize_Manager', 'add_page' ) ) {
-		$wp_customize->add_page( 'menus', array( 
+	// @requires WordPress 4.0-alpha-r28861 or newer.
+	if ( method_exists( 'WP_Customize_Manager', 'add_panel' ) ) {
+		$wp_customize->add_panel( 'menus', array(
 			'title' => __( 'Menus' ),
 			'description' => __( '<p>This screen is used for managing your custom navigation menus.</p><p>Menus can be displayed in locations defined by your theme, even used in sidebars by adding a “Custom Menu” widget on the Widgets screen.</p>' ),
 		) );
@@ -125,7 +125,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 	$description .= '<br>' . __( 'You can also place menus in widget areas with the Custom Menu widget.' );
 	$wp_customize->get_section( 'nav' )->title = __( 'Theme Locations' );
 	$wp_customize->get_section( 'nav' )->description = $description;
-	$wp_customize->get_section( 'nav' )->page = 'menus';
+	$wp_customize->get_section( 'nav' )->panel = 'menus';
 
 	// Add the screen options control to the existing "Navigation" section (it gets moved around in the JS).
 	$wp_customize->add_setting( 'menu_customizer_options', array(
@@ -147,7 +147,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 		$wp_customize->add_section( $section_id , array(
 			'title'    => $menu->name,
 			'priority' => 101, // Right after existing core "nav" section.
-			'page'     => 'menus',
+			'panel'     => 'menus',
 		) );
 
 		// Add a setting & control for the menu name.
