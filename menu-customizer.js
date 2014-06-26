@@ -1120,10 +1120,12 @@
 
 				// Replace the placeholder with the control markup.
 				placeholderContainer.html( menuItemMarkup )
-									.attr( 'id', 'customize-control-nav_menus-' + menuId + '-' + dbid );
+									.attr( 'id', 'customize-control-nav_menus-' + menuId + '-' + dbid )
+									.removeClass( 'nav-menu-inserted-item-loading' );
 
 				// Make it stand out a bit more visually, by adding a fadeIn.
-				//placeholderContainer.hide().fadeIn('slow');
+				// @todo try replacing this with a bouncing css transition; the hide part is awkward.
+				placeholderContainer.hide().fadeIn('slow');
 
 				// Register the new setting.
 				settingId = 'nav_menus[' + menuId + '][' + dbid + ']';
@@ -1158,12 +1160,6 @@
 				}
 
 				// @todo: Trigger the customizer `processing` state during this process so that saving is disabled.
-
-				// Fade the new control in after the other processing is complete.
-				// @todo need to remove the class after .menu-itemm-handle exists, so that its animation works.
-				if ( placeholder.find( '.menu-item-handle' ) ) {
-					placeholderContainer.removeClass( 'nav-menu-inserted-item-loading' );
-				}
 
 				$( document ).trigger( 'menu-item-added', [ item ] );
 
