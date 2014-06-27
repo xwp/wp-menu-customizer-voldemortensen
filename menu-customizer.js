@@ -1085,6 +1085,7 @@
 			var self = this,
 				params,
 				placeholderContainer,
+				processing,
 				menuId = self.params.menu_id,
 				menuControl = $( '#customize-control-nav_menus-' + menuId + '-controls' );
 
@@ -1099,6 +1100,10 @@
 			placeholderContainer = menuControl.prev( '.nav-menu-inserted-item-loading' );
 
 			callback = callback || function(){};
+
+			// Trigger customizer processing state.
+			processing = wp.customize.state( 'processing' );
+			processing( processing() + 1 );
 
 			params = {
 				'action': 'add-menu-item-customizer',
@@ -1166,7 +1171,9 @@
 					self.setting( menuItems );
 				}
 
-				// @todo: Trigger the customizer `processing` state during this process so that saving is disabled.
+
+				// Remove this level of the customizer processing state.
+				processing( processing() - 1 );
 
 				$( document ).trigger( 'menu-item-added', [ item ] );
 
