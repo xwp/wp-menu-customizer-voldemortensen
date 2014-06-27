@@ -1156,6 +1156,7 @@
 				if ( $( 'body' ).hasClass( 'adding-menu-items' ) ) {
 					// Move the delete button up to match the existing widgets.
 					api.Menus.getMenuItemControl( dbid ).toggleDeletePosition( true );
+					api.Menus.refreshVisibleMenuOptions();
 				}
 
 				// Add item to this menu.
@@ -1270,6 +1271,21 @@
 
 		return foundControl;
 	};
+
+	/**
+	 * Show/hide the visible fields based on the screen options.
+	 */
+	api.Menus.refreshVisibleMenuOptions = function() {
+		$( '.hide-column-tog' ).each( function() {
+			var $t = $(this), column = $t.val();
+			if ( $t.prop('checked') ) {
+				$('.field-' + column).show();
+			}
+			else {
+				$('.field-' + column).hide();
+			}
+		} );
+	}
 
 	/**
 	 * @param {String} menuItemId
