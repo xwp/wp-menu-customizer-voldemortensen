@@ -1171,7 +1171,6 @@
 					self.setting( menuItems );
 				}
 
-
 				// Remove this level of the customizer processing state.
 				processing( processing() - 1 );
 
