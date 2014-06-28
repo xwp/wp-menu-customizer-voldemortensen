@@ -125,6 +125,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 	$description .= '<br>' . __( 'You can also place menus in widget areas with the Custom Menu widget.' );
 	$wp_customize->get_section( 'nav' )->title = __( 'Theme Locations' );
 	$wp_customize->get_section( 'nav' )->description = $description;
+	$wp_customize->get_section( 'nav' )->priority = 5;
 	$wp_customize->get_section( 'nav' )->panel = 'menus';
 
 	// Add the screen options control to the existing "Navigation" section (it gets moved around in the JS).
@@ -146,7 +147,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 		$section_id = 'nav_menus[' . $menu_id . ']';
 		$wp_customize->add_section( $section_id , array(
 			'title'    => $menu->name,
-			'priority' => 101, // Right after existing core "nav" section.
+			'priority' => 10,
 			'panel'     => 'menus',
 		) );
 
@@ -241,6 +242,23 @@ function menu_customizer_customize_register( $wp_customize ) {
 			'priority' => 999,
 		) );
 	}
+
+	// Add the add-new-menu section and controls.
+	$wp_customize->add_section( 'add_menu', array(
+		'title'    => __( '+ New Menu' ),
+		'panel'    => 'menus',
+		'priority' => 99,
+	) );
+
+	$wp_customize->add_setting( 'new_menu_name', array(
+		'default' => '',
+	) );
+
+	$wp_customize->add_control( 'new_menu_name', array(
+		'label'    => __( 'New menu name' ),
+		'section'  => 'add_menu',
+		'type'     => 'text',
+	) );
 }
 add_action( 'customize_register', 'menu_customizer_customize_register', 11 ); // Needs to run after core Navigation section is setup.
 
