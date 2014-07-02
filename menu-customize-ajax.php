@@ -3,6 +3,35 @@
  * Ajax functions for the Menu Customizer.
  */
 
+/**
+ * Ajax handler for adding a new menu.
+ *
+ * @since Menu Customizer 0.0.
+ */
+function menu_customizer_new_menu_ajax() {
+	check_ajax_referer( 'customize-menus', 'customize-nav-menu-nonce' );
+
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		wp_die( -1 );
+	}
+
+	$menu_name = sanitize_text_field( $_POST['menu-name'] );
+
+	// Create the menu.
+	$menu_id = wp_create_nav_menu( $menu_name );
+
+	if ( is_wp_error( $menu_id ) ) {
+		// @todo error handling, ideally providing user feedback (most likely case here is a duplicate menu name).
+		wp_die();
+	}
+
+	// Output the markup for this new menu.
+	menu_customizer_render_new_menu( $menu_id, $menu_name );
+
+	wp_die();
+}
+add_action( 'wp_ajax_add-nav-menu-customizer', 'menu_customizer_new_menu_ajax');
+
 
 /**
  * Ajax handler for adding a menu item. Based on wp_ajax_add_menu_item().
