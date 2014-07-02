@@ -656,3 +656,40 @@ function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
 	</div>
 	<?php
 }
+
+/**
+ * Render a new menu section and all of its default controls.
+ *
+ * Required for adding new menus becuase there isn't a JS API for this in the Customizer (yet).
+ * @link https://core.trac.wordpress.org/ticket/28709
+ *
+ * @param int $menu_id The menu's id.
+ * @param int $depth The depth of the menu item.
+ */
+function menu_customizer_render_new_menu( $menu_id, $menu_name ) {
+	?>
+	<li id="accordion-section-nav_menus[<?php echo $menu_id; ?>]" class="control-section accordion-section control-subsection">
+		<h3 class="accordion-section-title" tabindex="0"><?php echo $menu_name; ?></h3>
+		<ul class="accordion-section-content">
+			<li id="customize-control-nav_menus-<?php echo $menu_id; ?>-name" class="customize-control customize-control-text">
+				<label>
+					<input type="text" value="<?php echo $menu_name; ?>" data-customize-setting-link="nav_menus[<?php echo $menu_id; ?>][name]">
+				</label>
+			</li>
+			<li id="customize-control-nav_menus-<?php echo $menu_id; ?>-controls" class="customize-control customize-control-nav_menu">
+				<span class="button-secondary add-new-menu-item" tabindex="0"><?php _e( 'Add Links' ); ?></span>
+				<span class="add-menu-item-loading spinner" style="display: none;"></span>
+				<span class="reorder-toggle" tabindex="0">
+					<span class="reorder"><?php _e( 'Reorder' ); ?></span>
+					<span class="reorder-done"><?php _e( 'Done' ); ?></span>
+				</span>
+			</li>
+			<li id="customize-control-nav_menus-<?php echo $menu_id; ?>-auto_add" class="customize-control customize-control-checkbox">
+				<label>
+					<input type="checkbox" value="" data-customize-setting-link="nav_menus[<?php echo $menu_id; ?>][auto_add]"><?php _e( 'Automatically add new top-level pages to this menu.' ); ?>
+				</label>
+			</li>			
+		</ul>
+	</li>
+	<?php
+}
