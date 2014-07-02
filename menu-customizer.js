@@ -867,7 +867,7 @@
 	 * wp.customize.Menus.MenuControl
 	 *
 	 * Customizer control for menus.
-	 * Note that 'menu_control' must match the WP_Menu_Customize_Control::$type
+	 * Note that 'nav_menu' must match the WP_Menu_Customize_Control::$type
 	 *
 	 * @constructor
 	 * @augments wp.customize.Control

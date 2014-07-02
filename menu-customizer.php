@@ -206,13 +206,14 @@ function menu_customizer_customize_register( $wp_customize ) {
 			) ) );
 		}
 
-		// Add the menu-wide controls (add, re-order, etc.).
-		$menu_controls_setting_id = $section_id . '[controls]';
-		$wp_customize->add_setting( $menu_controls_setting_id, array(
-			'type'    => 'menu_controls',
+		// Add the menu control, which handles adding and ordering.
+		$nav_menu_setting_id = $section_id . '[controls]';
+		$wp_customize->add_setting( $nav_menu_setting_id, array(
+			'type'    => 'nav_menu',
 			'default' => $item_ids,
 		) );
-		$wp_customize->add_control( new WP_Menu_Customize_Control( $wp_customize, $menu_controls_setting_id, array(
+
+		$wp_customize->add_control( new WP_Menu_Customize_Control( $wp_customize, $nav_menu_setting_id, array(
 			'section'  => $section_id,
 			'menu_id'  => $menu_id,
 			'priority' => 998,
@@ -235,6 +236,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 			'type'    => 'menu_autoadd',
 			'default' => $auto_add,
 		) );
+
 		$wp_customize->add_control( $menu_autoadd_setting_id, array(
 			'label'    => __( 'Automatically add new top-level pages to this menu.' ),
 			'section'  => $section_id,
@@ -337,6 +339,34 @@ function menu_customizer_update_menu_autoadd( $value, $setting ) {
 	update_option( 'nav_menu_options', $nav_menu_option );	
 }
 add_action( 'customize_update_menu_autoadd', 'menu_customizer_update_menu_autoadd', 10, 2 );
+
+/**
+ * Save changes made to a nav menu.
+ *
+ * Assigns cloned & modified items to this menu, publishing them.
+ * Updates the order of all items in the menu.
+ *
+ * @since Menu Customizer 0.0
+ *
+ * @param array $value Array of the new menu items, in order.
+ * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
+ */
+function menu_customizer_update_nav_menu( $value, $setting ) {
+// @todo this is pseudo-code.
+	// $originals = get menu item ids ( $menu_id );
+	// $items = $value; (array of ordered item ids)
+	// $old_items = $originals that are not in $items, includes items that have been cloned (with updates), for which the original gets deleted here
+	// $i = 1;
+	// foreach( $items as $item_id ) {
+	//		// Assign the existing item to this menu, in case it's orphaned. Update the order, regardless.
+	//		update_menu_item( $item_id, $menu_id, array( 'order' => $i ) );
+	//		$i++;
+	// }
+	// foreach( $old_items as $item_id ) {
+	//		delete_menu_item( $item_id );
+	// }
+}
+add_action( 'customize_update_nav_menu', 'menu_customizer_update_nav_menu' );
 
 /**
  * Return all potential menu items.
@@ -499,7 +529,7 @@ function menu_customizer_available_items_template() {
 	</div><!-- #available-menu-items -->
 <?php
 }
-add_action( 'customize_controls_print_footer_scripts','menu_customizer_available_items_template' );
+add_action( 'customize_controls_print_footer_scripts', 'menu_customizer_available_items_template' );
 
 /**
  * Render a single menu item control.

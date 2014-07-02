@@ -7,7 +7,7 @@
  * Menu Customize Control Class
  */
 class WP_Menu_Customize_Control extends WP_Customize_Control {
-	public $type = 'menu';
+	public $type = 'nav_menu';
 	public $menu_id;
 
 	/**
@@ -30,7 +30,6 @@ class WP_Menu_Customize_Control extends WP_Customize_Control {
 	 */
 	public function render_content() {
 		$id = absint( $this->menu_id );
-		
 		?>
 
 		<span class="button-secondary add-new-menu-item" tabindex="0">
