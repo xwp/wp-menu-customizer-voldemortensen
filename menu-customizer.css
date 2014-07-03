@@ -626,7 +626,7 @@ body.adding-menu-items #customize-preview {
 /* Add/delete Menus */
 #create-new-menu-submit {
 	float: right;
-	margin: 12px 0px;
+	margin: 0 0 12px 0;
 }
 
 #toggle-menu-delete {
@@ -646,5 +646,8 @@ body.adding-menu-items #customize-preview {
 	}
 	.customize-control-menu {
 		margin-top: 12px;
+	}
+	.customize-control input.menu-name-field {
+		margin-bottom: 12px;
 	}
 }

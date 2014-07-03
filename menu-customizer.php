@@ -257,11 +257,12 @@ function menu_customizer_customize_register( $wp_customize ) {
 
 	$wp_customize->add_setting( 'new_menu_name', array() );
 	$wp_customize->add_control( 'new_menu_name', array(
-		'label'    => __( 'New menu name' ),
+		'label'    => '',
 		'section'  => 'add_menu',
 		'type'     => 'text',
 		'input_attrs' => array(
 			'class' => 'menu-name-field',
+			'placeholder' => __( 'New menu name' ),
 		),
 	) );
 
