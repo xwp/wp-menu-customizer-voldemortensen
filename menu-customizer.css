@@ -645,6 +645,10 @@ body.adding-menu-items #customize-preview {
     float: right;
 }
 
+.customize-control-new_menu .spinner {
+	float: left;
+}
+
 /* Media queries */
 @media screen and (max-height: 700px) and (min-width: 981px) {
 	.menu-item-handle {

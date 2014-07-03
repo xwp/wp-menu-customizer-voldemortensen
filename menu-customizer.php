@@ -164,7 +164,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 			'type'     => 'text',
 			'priority' => 0,
 			'input_attrs' => array(
-				'class' => 'menu-name-field',
+				'class' => 'menu-name-field live-update-section-title',
 			),
 		) );
 

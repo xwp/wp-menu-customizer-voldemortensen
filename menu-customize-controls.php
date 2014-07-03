@@ -209,6 +209,7 @@ class WP_New_Menu_Customize_Control extends WP_Customize_Control {
 	 */
 	public function render_content() {
 		?>
+		<span class="spinner"></span>
 		<input type="submit" class="button button-primary" id="create-new-menu-submit" value="<?php _e( 'Create Menu' ); ?>" />
 		<button class="button" id="toggle-menu-delete"><?php _e( 'Delete an Existing Menu' ); ?></button>
 		<?php

@@ -1183,12 +1183,57 @@
 	} );
 
 	/**
+	 * wp.customize.Menus.NewMenuControl
+	 *
+	 * Customizer control for creating new menus and handling deletion of existing menus.
+	 * Note that 'new_menu' must match the WP_New_Menu_Customize_Control::$type.
+	 *
+	 * @constructor
+	 * @augments wp.customize.Control
+	 */
+	api.Menus.NewMenuControl = api.Control.extend({
+		/**
+		 * Set up the control.
+		 */
+		ready: function() {
+			this._bindHandlers();
+		},
+
+		_bindHandlers: function() {
+			var name = $( '#customize-control-new_menu_name input' ),
+				submit = $( '#create-new-menu-submit' ),
+				toggle = $( '#toggle-menu-delete' );
+			name.on( 'input', function( event ) {
+				if ( event.type === 'keypress' && ( event.which === 13 ) ) {
+					sumbit.click();
+				}
+			} );
+			submit.on( 'click', this.submit );
+			toggle.on( 'click', this.toggleDelete );
+		},
+
+		submit: function( el ) {
+			// @todo ajax to create the new menu
+
+			return false;
+		},
+
+		// Toggles menu-deletion mode for all menus.
+		toggleDelete: function() {
+			// @todo toggle a menu deletion mode.
+
+			return false;
+		}
+	});
+
+	/**
 	 * Extends wp.customizer.controlConstructor with control constructor for
-	 * menu_item and menu.
+	 * menu_item, nav_menu, and new_menu.
 	 */
 	$.extend( api.controlConstructor, {
 		menu_item: api.Menus.MenuItemControl,
-		menu: api.Menus.MenuControl
+		nav_menu: api.Menus.MenuControl,
+		new_menu: api.Menus.NewMenuControl
 	});
 
 	/**
@@ -1305,7 +1350,7 @@
 	 * Update Section Title as menu name is changed and item handle title when label is changed.
 	 */
 	function setupUIPreviewing() {
-		$( '#accordion-section-menus' ).on( 'input', '.customize-control-text input', function(e) {
+		$( '#accordion-section-menus' ).on( 'input', '.live-update-section-title', function(e) {
 			var el = $( e.currentTarget ),
 				name = el.val(),
 				title = el.closest( '.accordion-section' ).find( '.accordion-section-title' );
