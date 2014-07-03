@@ -624,6 +624,18 @@ body.adding-menu-items #customize-preview {
 }
 
 /* Add/delete Menus */
+#accordion-section-add_menu .accordion-section-title {
+	padding-left: 45px;
+}
+
+#accordion-section-add_menu .accordion-section-title:before {
+    font: normal 20px/1 dashicons;
+    position: absolute;
+    top: 11px;
+    left: 14px;
+    content: "\f132";
+}
+
 #create-new-menu-submit {
 	float: right;
 	margin: 0 0 12px 0;

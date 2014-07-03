@@ -250,7 +250,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 
 	// Add the add-new-menu section and controls.
 	$wp_customize->add_section( 'add_menu', array(
-		'title'    => __( '+ New Menu' ),
+		'title'    => __( 'New Menu' ),
 		'panel'    => 'menus',
 		'priority' => 99,
 	) );
