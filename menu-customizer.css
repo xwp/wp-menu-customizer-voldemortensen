@@ -191,7 +191,7 @@
 	display: none;
 }
 
-.wp-customizer li[id*="nav_menu"].control-section li[id*="nav_menu"].customize-control:first-child input[type="text"] {
+.customize-control input.menu-name-field {
 	width: 100%; /* Override the 98% default for customizer inputs, to align with the size of menu items. */
 	margin-bottom: 8px; /* Override collapsing at smaller viewports. */
 }
@@ -574,7 +574,7 @@
 }
 
 #available-menu-items .item-add:before {
-	content: "\f132";;
+	content: "\f132";
 	font: normal 20px/1 dashicons;
 	position: absolute;
 	left: 6px;
@@ -623,6 +623,15 @@ body.adding-menu-items #customize-preview {
 	transition-timing-function: cubic-bezier( .25, -2.5, .75, 8 ); /* Replacement for .hide().fadeIn('slow') in JS to add emphasis when it's loaded. */
 }
 
+/* Add/delete Menus */
+#create-new-menu-submit {
+	float: right;
+	margin: 12px 0px;
+}
+
+#toggle-menu-delete {
+    float: right;
+}
 
 /* Media queries */
 @media screen and (max-height: 700px) and (min-width: 981px) {

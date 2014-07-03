@@ -163,6 +163,9 @@ function menu_customizer_customize_register( $wp_customize ) {
 			'section'  => $section_id,
 			'type'     => 'text',
 			'priority' => 0,
+			'input_attrs' => array(
+				'class' => 'menu-name-field',
+			),
 		) );
 
 		// Add the menu contents.
@@ -252,15 +255,20 @@ function menu_customizer_customize_register( $wp_customize ) {
 		'priority' => 99,
 	) );
 
-	$wp_customize->add_setting( 'new_menu_name', array(
-		'default' => '',
-	) );
-
+	$wp_customize->add_setting( 'new_menu_name', array() );
 	$wp_customize->add_control( 'new_menu_name', array(
 		'label'    => __( 'New menu name' ),
 		'section'  => 'add_menu',
 		'type'     => 'text',
+		'input_attrs' => array(
+			'class' => 'menu-name-field',
+		),
 	) );
+
+	$wp_customize->add_setting( 'create_new_menu', array() );
+	$wp_customize->add_control( new WP_New_Menu_Customize_Control( $wp_customize, 'create_new_menu', array(
+		'section' => 'add_menu',
+	) ) );
 }
 add_action( 'customize_register', 'menu_customizer_customize_register', 11 ); // Needs to run after core Navigation section is setup.
 

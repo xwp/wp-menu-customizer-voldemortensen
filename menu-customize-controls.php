@@ -195,3 +195,22 @@ class WP_Menu_Options_Customize_Control extends WP_Customize_Control {
 	}
 }
 
+
+/**
+ * New Menu Customize Control Class
+ */
+class WP_New_Menu_Customize_Control extends WP_Customize_Control {
+	public $type = 'new_menu';
+
+	/**
+	 * Render the control's content.
+	 *
+	 * @since Menu Customizer 0.0
+	 */
+	public function render_content() {
+		?>
+		<input type="submit" class="button button-primary" id="create-new-menu-submit" value="<?php _e( 'Create Menu' ); ?>" />
+		<button class="button" id="toggle-menu-delete"><?php _e( 'Delete an Existing Menu' ); ?></button>
+		<?php
+	}
+}
