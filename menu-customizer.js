@@ -1178,7 +1178,7 @@
 
 				callback();
 			});
-			
+
 		}
 	} );
 
@@ -1200,20 +1200,120 @@
 		},
 
 		_bindHandlers: function() {
-			var name = $( '#customize-control-new_menu_name input' ),
+			var self = this,
+				name = $( '#customize-control-new_menu_name input' ),
 				submit = $( '#create-new-menu-submit' ),
 				toggle = $( '#toggle-menu-delete' );
-			name.on( 'input', function( event ) {
-				if ( event.type === 'keypress' && ( event.which === 13 ) ) {
-					sumbit.click();
+			name.on( 'keydown', function( event ) {
+				if ( event.which === 13 ) { // Enter.
+					self.submit();
 				}
 			} );
-			submit.on( 'click', this.submit );
-			toggle.on( 'click', this.toggleDelete );
+			submit.on( 'click', function() {
+				self.submit();
+			} );
+			toggle.on( 'click', self.toggleDelete );
 		},
 
-		submit: function( el ) {
-			// @todo ajax to create the new menu
+		submit: function() {
+			var self = this,
+				processing,
+				params,
+				container = this.container.closest( '.accordion-section' ),
+				name = container.find( '.menu-name-field' ).first(),
+				spinner = container.find( '.spinner' );
+
+			// Menu name is required.
+			if ( ! name.val() ) {
+				return false;
+			}
+
+			// Show spinner.
+			spinner.show();
+
+			// Trigger customizer processing state.
+			processing = wp.customize.state( 'processing' );
+			processing( processing() + 1 );
+
+			params = {
+				'action': 'add-nav-menu-customizer',
+				'menu-name': name.val(),
+				'customize-nav-menu-nonce': api.Menus.data.nonce,
+			};
+
+			$.post( ajaxurl, params, function( menuSectionMarkup ) {
+				var menu_id, sectionId, settingIdName, settingIdControls,
+					settingIdAuto, settingArgs, controlConstructor,
+					menuControl, menuNameControl, menuAutoControl;
+
+				menuSectionMarkup = $.trim( menuSectionMarkup ); // Trim leading whitespaces.
+				sectionId = $( menuSectionMarkup ).first( '.accordion-section' ).attr( 'id' );
+				if ( ! sectionId ) {
+					// Something's wrong with the returned markup, bail.
+					return false;
+				}
+				menu_id = sectionId.replace( 'accordion-section-nav_menus[', '' );
+				menu_id = menu_id.replace( '[', '' );
+
+				// Add the new menu to the DOM.
+				container.before( menuSectionMarkup );
+				$( '#' . sectionId ).hide().slideDown( 'slow' );
+
+				// Register the new settings.
+				settingIdName = 'nav_menus[' + menu_id + '][name]';
+				settingArgs = {
+					transport: 'refresh',
+					previewer: self.setting.previewer
+				};
+				api.create( settingIdName, settingIdName, {}, settingArgs );
+				settingIdControls = 'nav_menus[' + menu_id + '][controls]';
+				api.create( settingIdControls, settingIdControls, {}, settingArgs );
+				settingIdAuto = 'nav_menus[' + menu_id + '][auto_add]';
+				api.create( settingIdAuto, settingIdAuto, {}, settingArgs );
+
+				// Register the new menu name control.
+				menuNameControl = new api.Control( settingIdName, {
+					params: {
+						settings: {
+							'default': settingIdName
+						},
+					},
+					previewer: self.setting.previewer
+				} );
+				api.control.add( settingIdName, menuNameControl );
+
+				// Register the new menu auto-add control.
+				menuAutoControl = new api.Control( settingIdAuto, {
+					params: {
+						settings: {
+							'default': settingIdAuto
+						},
+					},
+					previewer: self.setting.previewer
+				} );
+				api.control.add( settingIdAuto, menuAutoControl );
+
+				// Register the new menu name control.
+				controlConstructor = api.controlConstructor['nav_menu'];
+				menuControl = new controlConstructor( settingIdControls, {
+					params: {
+						settings: {
+							'default': settingIdControls
+						},
+					},
+					previewer: self.setting.previewer
+				} );
+				api.control.add( settingIdControls, menuControl );
+
+				// Remove this level of the customizer processing state.
+				processing( processing() - 1 );
+
+				// Hide spinner.
+				spinner.hide();
+
+				// Clear name field.
+				name.val('');
+			});
 
 			return false;
 		},

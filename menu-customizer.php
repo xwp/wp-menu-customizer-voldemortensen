@@ -255,7 +255,10 @@ function menu_customizer_customize_register( $wp_customize ) {
 		'priority' => 99,
 	) );
 
-	$wp_customize->add_setting( 'new_menu_name', array() );
+	$wp_customize->add_setting( 'new_menu_name', array(
+		'type' => 'new_menu', // Prevent this from being saved anywhere.
+		'default' => '',
+	) );
 	$wp_customize->add_control( 'new_menu_name', array(
 		'label'    => '',
 		'section'  => 'add_menu',
@@ -266,7 +269,9 @@ function menu_customizer_customize_register( $wp_customize ) {
 		),
 	) );
 
-	$wp_customize->add_setting( 'create_new_menu', array() );
+	$wp_customize->add_setting( 'create_new_menu', array(
+		'type' => 'new_menu',
+	) );
 	$wp_customize->add_control( new WP_New_Menu_Customize_Control( $wp_customize, 'create_new_menu', array(
 		'section' => 'add_menu',
 	) ) );
