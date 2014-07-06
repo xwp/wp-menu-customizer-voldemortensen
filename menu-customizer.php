@@ -85,6 +85,7 @@ function menu_customizer_enqueue() {
 		'l10n'               => array(
 			'untitled'     => _x( '(no label)', 'Missing menu item navigation label.' ),
 			'custom_label' => _x( 'Custom', 'Custom menu item type label.' ),
+			'deleteWarn'   => __( 'You are about to permanently delete this menu. "Cancel" to stop, "OK" to delete. ' ),
 		),
 		'tpl'                => array(
 			'menuitemReorderNav'  => $menuitem_reorder_nav_tpl,

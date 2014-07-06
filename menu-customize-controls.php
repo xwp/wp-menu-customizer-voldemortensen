@@ -42,6 +42,10 @@ class WP_Menu_Customize_Control extends WP_Customize_Control {
 			<span class="reorder"><?php _ex( 'Reorder', 'Reorder menu items in Customizer' ); ?></span>
 			<span class="reorder-done"><?php _ex( 'Done', 'Cancel reordering menu items in Customizer'  ); ?></span>
 		</span>
+
+		<span class="menu-delete" id="delete-menu-<?php echo $id; ?>" tabindex="0">
+			<span class="screen-reader-text"><?php printf( __( "Delete menu: %s" ), wp_get_nav_menu_object( $id )->name ); ?> </span>
+		</span>
 		<ul class="menu-settings">
 			<?php // We may need to bring this back, depending on the outcome of user testing. Hide it for now in favor of the locations section. (The idea is that having all menus visible/editable at once makes the locations selectors more intuitive and the checkboxes confusing)
 				if ( current_theme_supports( 'menus' ) && ! current_theme_supports( 'menus' ) ) : ?>

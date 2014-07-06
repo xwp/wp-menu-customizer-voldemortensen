@@ -883,6 +883,7 @@
 			this._setupModel();
 			this._setupSortable();
 			this._setupAddition();
+			this._setupDeletion();
 			this._applyCardinalOrderClassNames();
 		},
 
@@ -1008,6 +1009,15 @@
 					api.Menus.availableMenuItemsPanel.close();
 				}
 			} );
+		},
+
+		/**
+		 * Move menu-delete button to section title. Actual deletion is managed with api.Menus.NewMenuControl.
+		 */
+		_setupDeletion: function() {
+			var title = this.$controlSection.find( '.accordion-section-title' ),
+				deleteBtn = this.container.find( '.menu-delete' );
+			title.append( deleteBtn );
 		},
 
 		/**
@@ -1203,7 +1213,8 @@
 			var self = this,
 				name = $( '#customize-control-new_menu_name input' ),
 				submit = $( '#create-new-menu-submit' ),
-				toggle = $( '#toggle-menu-delete' );
+				toggle = $( '#toggle-menu-delete' ),
+				deleteBtns = $( '.menu-delete' );
 			name.on( 'keydown', function( event ) {
 				if ( event.which === 13 ) { // Enter.
 					self.submit();
@@ -1212,7 +1223,14 @@
 			submit.on( 'click', function() {
 				self.submit();
 			} );
-			toggle.on( 'click', self.toggleDelete );
+			toggle.on( 'click', function() {
+				self.toggleDelete();
+			} );
+			deleteBtns.on( 'click', function( e ) {
+				self.submitDelete( e.target );
+				e.stopPropagation();
+				e.preventDefault();
+			} );
 		},
 
 		submit: function() {
@@ -1320,9 +1338,40 @@
 
 		// Toggles menu-deletion mode for all menus.
 		toggleDelete: function() {
-			// @todo toggle a menu deletion mode.
+			var container = $( '#accordion-section-menus' ),
+				sections = container.find( '.accordion-section-title' ),
+				buttons = container.find( 'menu-delete');
+
+			container.toggleClass( 'deleting-menus' );
 
 			return false;
+		},
+		
+		// Deletes a menu (pending user confirmation).
+		submitDelete: function( el ) {
+			var menu_id = $( el) .attr( 'id' ),
+				section = $( el ).closest( '.accordion-section' ),
+				next = section.next().find( '.accordion-section-title' );
+			menu_id = menu_id.replace( 'delete-menu-', '' );
+			if ( menu_id ) {
+				// Prompt user with an AYS.
+				if ( confirm( api.Menus.data.l10n.deleteWarn ) ) {
+					section.addClass( 'deleting' );
+					next.focus();
+					// Delete the menu.
+					params = {
+						'action': 'delete-menu-customizer',
+						'menu_id': menu_id,
+						'customize-menu-item-nonce': api.Menus.data.nonce
+					};
+					$.post( ajaxurl, params, function( success ) {
+						// Remove the UI, once menu has been deleted.
+						section.slideUp( 'slow', function() {
+							section.remove();
+						} );
+					} );
+				}
+			}
 		}
 	});
 
