@@ -32,6 +32,26 @@ function menu_customizer_new_menu_ajax() {
 }
 add_action( 'wp_ajax_add-nav-menu-customizer', 'menu_customizer_new_menu_ajax');
 
+/**
+ * Ajax handler for deleting a menu.
+ *
+ * @since Menu Customizer 0.0.
+ */
+function menu_customizer_delete_menu_ajax() {
+	$menu_id = absint( $_POST['menu_id'] );
+	check_ajax_referer( 'customize-menus', 'customize-nav-menu-nonce' );
+	if ( is_nav_menu( $menu_id ) ) {
+		$deletion = wp_delete_nav_menu( $menu_id );
+		if ( is_wp_error( $deletion ) ) {
+			echo $deletion->message();
+		}
+	} else {
+		echo __( 'Error: invalid menu to delete.' );
+	}
+
+	wp_die();
+}
+add_action( 'wp_ajax_delete-menu-customizer', 'menu_customizer_delete_menu_ajax');
 
 /**
  * Ajax handler for adding a menu item. Based on wp_ajax_add_menu_item().

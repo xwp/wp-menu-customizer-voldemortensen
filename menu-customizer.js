@@ -1362,7 +1362,7 @@
 					params = {
 						'action': 'delete-menu-customizer',
 						'menu_id': menu_id,
-						'customize-menu-item-nonce': api.Menus.data.nonce
+						'customize-nav-menu-nonce': api.Menus.data.nonce
 					};
 					$.post( ajaxurl, params, function( success ) {
 						// Remove the UI, once menu has been deleted.
