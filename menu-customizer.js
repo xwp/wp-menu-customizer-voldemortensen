@@ -888,7 +888,7 @@
 		},
 
 		/**
-		 * Update ordering of menu item control forms when the setting is updated.
+		 * Update ordering of menu item controls when the setting is updated.
 		 */
 		_setupModel: function() {
 			var self = this,
@@ -900,13 +900,9 @@
 				removedMenuItemIds = _( oldMenuItemIds ).difference( newMenuItemIds );
 
 				menuItemControls = _( newMenuItemIds ).map( function( menuItemId ) {
-					var menuControl = api.Menus.getMenuControlContainingItem( menuItemId );
+					var menuItemControl = api.Menus.getMenuItemControl( menuItemId );
 
-					if ( ! menuControl ) {
-						menuControl = self.addMenuItem( menuItemId ); // @todo why?
-					}
-
-					return menuControl;
+					return menuItemControl;
 				} );
 
 				// Sort menu item controls to their new positions.
@@ -922,8 +918,8 @@
 				} );
 
 				// Append the controls to put them in the right order
-				finalControlContainers = _( menuItemControls ).map( function( menuItemControls ) {
-					return menuItemControls.container[0];
+				finalControlContainers = _( menuItemControls ).map( function( menuItemControl ) {
+					return menuItemControl.container;
 				} );
 
 				$menuAddControl = self.$sectionContent.find( '.customize-control-menu' );
@@ -936,7 +932,7 @@
 				_( removedMenuItemIds ).each( function( removedMenuItemId ) {
 					var removedControl, removedId;
 
-					removedControl = api.Menus.getMenuControlContainingItem( removedMenuItemId );
+					removedControl = api.Menus.getMenuItemControl( removedMenuItemId );
 
 					// Delete any menu item controls for removed items.
 					if ( removedControl ) {
@@ -1438,7 +1434,7 @@
 	},
 
 	/**
-	 * Given a menu item control, find the menu control that contains it.
+	 * Given a menu item id, find the menu control that contains it.
 	 * @param {string} menuItemId
 	 * @return {object|null}
 	 */

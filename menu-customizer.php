@@ -367,21 +367,95 @@ add_action( 'customize_update_menu_autoadd', 'menu_customizer_update_menu_autoad
  * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
  */
 function menu_customizer_update_nav_menu( $value, $setting ) {
-// @todo this is pseudo-code.
-	// $originals = get menu item ids ( $menu_id );
-	// $items = $value; (array of ordered item ids)
-	// $old_items = $originals that are not in $items, includes items that have been cloned (with updates), for which the original gets deleted here
-	// $i = 1;
-	// foreach( $items as $item_id ) {
-	//		// Assign the existing item to this menu, in case it's orphaned. Update the order, regardless.
-	//		update_menu_item( $item_id, $menu_id, array( 'order' => $i ) );
-	//		$i++;
-	// }
-	// foreach( $old_items as $item_id ) {
-	//		delete_menu_item( $item_id );
-	// }
+	$menu_id = str_replace( 'nav_menus[', '', $setting->id );
+	$menu_id = absint( str_replace( '][controls]', '', $menu_id ) );
+
+	// Get original items in this menu. Any that aren't there anymore need to be deleted.
+	$originals = wp_get_nav_menu_items( $menu_id );
+	// Convert to just an array of ids
+	$original_ids = array();
+	foreach ( $originals as $item ) {
+		$original_ids[] = $item->ID;
+	}
+
+	$items = $value; // Ordered array of item ids.
+
+	if ( $original_ids === $items ) {
+		// This menu is completely unchanged - don't need to do anything else.
+		return $value;
+	}
+
+	// Are there removed items that need to be deleted?
+	// This will also include any items that have been cloned.
+	$old_items = array_diff( $original_ids, $items );
+
+	$i = 1;
+	foreach( $items as $item_id ) {
+		// Assign the existing item to this menu, in case it's orphaned. Update the order, regardless.
+		menu_customizer_update_menu_item( $menu_id, $item_id, array( 'menu-item-position' => $i ) );
+		$i++;
+	}
+
+	foreach( $old_items as $item_id ) {
+		if( is_nav_menu_item( $item_id ) ) {
+			wp_delete_post( $item_id, true );
+		}
+	}
 }
-add_action( 'customize_update_nav_menu', 'menu_customizer_update_nav_menu' );
+add_action( 'customize_update_nav_menu', 'menu_customizer_update_nav_menu', 10, 2 );
+
+/**
+ * Update the order for and publishes a menu item.
+ *
+ * Skips the mess that is wp_update_nav_menu_item() and avoids getting 
+ * and messing with menu item fields that are not changed.
+ *
+ * @param int $menu_id The ID of the menu. Required.
+ * @param int $item_id The ID of the (existing) menu item.
+ * @param int $order The menu item's order/position.
+ * @return int|WP_Error The menu item's database ID or WP_Error object on failure.
+ */
+function menu_customizer_update_menu_item_order( $menu_id, $item_id, $order ) {
+	// @todo
+}
+
+/**
+ * Update properties of a nav menu item.
+ *
+ * Wrapper for wp_update_nav_menu_item() that only requires passing changed properties.
+ * @link https://core.trac.wordpress.org/ticket/28138
+ *
+ * @since Menu Customizer 0.0
+ *
+ * @param int $menu_id The ID of the menu. Required. If "0", makes the menu item a draft orphan.
+ * @param int $item_id The ID of the menu item. If "0", creates a new menu item.
+ * @param array $data The menu item's data to change.
+ * @return int|WP_Error The menu item's database ID or WP_Error object on failure.
+ */
+function menu_customizer_update_menu_item( $menu_id, $item_id, $data ) {
+	$item = get_post( $item_id );
+	$item = wp_setup_nav_menu_item( $item );
+    $defaults = array(
+		'menu-item-db-id' => $item_id,
+		'menu-item-object-id' => $item->object_id,
+		'menu-item-object' => $item->object,
+		'menu-item-parent-id' => $item->menu_item_parent,
+		'menu-item-position' => $item->menu_order,
+		'menu-item-type' => $item->type,
+		'menu-item-title' => $item->title,
+		'menu-item-url' => $item->url,
+		'menu-item-description' => $item->description,
+		'menu-item-attr-title' => $item->attr_title,
+		'menu-item-target' => $item->target,
+		'menu-item-classes' => implode( ' ', $item->classes ),
+		'menu-item-xfn' => $item->xfn,
+		'menu-item-status' => 'publish',
+	);
+
+	$args = wp_parse_args( $data, $defaults ); 
+
+	return wp_update_nav_menu_item( $menu_id, $item_id, $args );
+}
 
 /**
  * Return all potential menu items.
