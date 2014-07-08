@@ -721,7 +721,7 @@ body.adding-menu-items #customize-preview {
 		position: relative;
 		z-index: 1;
 	}
-	.customize-control-menu {
+	.customize-control-nav_menu {
 		margin-top: 12px;
 	}
 	.customize-control input.menu-name-field {
