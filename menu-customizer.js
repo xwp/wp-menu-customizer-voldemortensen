@@ -557,7 +557,7 @@
 			 * Handle clicks for up/down/left-right on the reorder nav.
 			 */
 			$reorderNav = this.container.find( '.menu-item-reorder-nav' );
-			$reorderNav.find( '.menu-move-up, .menus-move-down, .menus-move-left, .menu-move-right' ).on( 'click keypress', function( event ) {
+			$reorderNav.find( '.menus-move-up, .menus-move-down, .menus-move-left, .menu-move-right' ).on( 'click keypress', function( event ) {
 				if ( event.type === 'keypress' && ( event.which !== 13 && event.which !== 32 ) ) {
 					return;
 				}
@@ -820,14 +820,32 @@
 		 * Move menu item up one in the menu.
 		 */
 		moveUp: function() {
+			// Update menu control setting.
 			this._moveMenuItemByOne( -1 );
+			// Update UI.
+			var prev = $( this.container ).prev();
+			prev.before( $( this.container ) );
+			// Update parent if it's a sub-item.
+			if ( 0 != this.params.depth ) {
+				// @todo this.updateParent();
+			}
+			this.getMenuControl()._applyCardinalOrderClassNames();
 		},
 
 		/**
 		 * Move menu item up one in the menu.
 		 */
 		moveDown: function() {
+			// Update menu control setting.
 			this._moveMenuItemByOne( 1 );
+			// Update UI.
+			var next = $( this.container ).next();
+			next.after( $( this.container ) );
+			// Maybe update parent if it's a sub-item.
+			if ( 0 != this.params.depth ) {
+				// @todo this.updateParent();
+			}
+			this.getMenuControl()._applyCardinalOrderClassNames();
 		},
 		/**
 		 * Move menu item and all children up one level of depth.
