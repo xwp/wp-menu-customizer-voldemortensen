@@ -38,8 +38,14 @@ add_action( 'wp_ajax_add-nav-menu-customizer', 'menu_customizer_new_menu_ajax');
  * @since Menu Customizer 0.0.
  */
 function menu_customizer_delete_menu_ajax() {
-	$menu_id = absint( $_POST['menu_id'] );
 	check_ajax_referer( 'customize-menus', 'customize-nav-menu-nonce' );
+
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		wp_die( -1 );
+	}
+
+	$menu_id = absint( $_POST['menu_id'] );
+
 	if ( is_nav_menu( $menu_id ) ) {
 		$deletion = wp_delete_nav_menu( $menu_id );
 		if ( is_wp_error( $deletion ) ) {
@@ -52,6 +58,32 @@ function menu_customizer_delete_menu_ajax() {
 	wp_die();
 }
 add_action( 'wp_ajax_delete-menu-customizer', 'menu_customizer_delete_menu_ajax');
+
+/**
+ * Ajax handler for updating a menu item.
+ *
+ * @since Menu Customizer 0.0.
+ */
+function menu_customizer_update_item_ajax() {
+	check_ajax_referer( 'customize-menus', 'customize-menu-item-nonce' );
+
+	if ( ! current_user_can( 'edit_theme_options' ) ) {
+		wp_die( -1 );
+	}
+
+	$clone = $_POST['clone'];
+	$item_id = $_POST['item_id'];
+	$menu_item_data = (array) $_POST['menu-item'];
+
+	$id = menu_customizer_update_menu_item( 0, $item_id, $menu_item_data, $clone );
+
+	if ( ! is_wp_error( $id ) ) {
+		echo $id;
+	}
+
+	wp_die();
+}
+add_action( 'wp_ajax_update-menu-item-customizer', 'menu_customizer_update_item_ajax');
 
 /**
  * Ajax handler for adding a menu item. Based on wp_ajax_add_menu_item().

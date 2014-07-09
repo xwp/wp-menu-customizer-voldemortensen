@@ -694,8 +694,8 @@
 			//	'action': 'update-menu-item-customizer',
 			//	'clone' : clone,
 			//	'item_id': self.params.menu_item_id,
-			//	'customize-menu-item-nonce': api.Menus.data.nonce,
-			//	'menu-item': item
+			//	'menu-item': args,
+			//	'customize-menu-item-nonce': api.Menus.data.nonce
 			//};
 
 			//$.post( ajaxurl, params, function( id ) {
