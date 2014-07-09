@@ -26,7 +26,6 @@
 		menu_item_id: null,
 		menu_id: 0,
 		depth: 0,
-		position: 0,
 		type: 'menu_item',
 	});
 
@@ -535,18 +534,6 @@
 		_setupReorderUI: function() {
 			var self = this, selectMenu,
 				$reorderNav, updateAvailableMenus;
-
-			/**
-			 * select the provided menu list item in the move menu item area.
-			 *
-			 * @param {jQuery} li
-			 */
-			selectMenu = function( li ) {
-				li.siblings( '.selected' ).removeClass( 'selected' );
-				li.addClass( 'selected' );
-				var isSelfMenu = ( li.data( 'id' ) === self.params.menu_id );
-				self.container.find( '.move-menu-item-btn' ).prop( 'disabled', isSelfMenu );
-			};
 
 			/**
 			 * Add the menu item reordering elements to the menu item control.
