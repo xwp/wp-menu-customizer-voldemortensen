@@ -392,7 +392,7 @@ function menu_customizer_update_nav_menu( $value, $setting ) {
 	$i = 1;
 	foreach( $items as $item_id ) {
 		// Assign the existing item to this menu, in case it's orphaned. Update the order, regardless.
-		menu_customizer_update_menu_item( $menu_id, $item_id, array( 'menu-item-position' => $i ) );
+		menu_customizer_update_menu_item( $menu_id, $item_id, array( 'menu-item-position' => $i, 'menu-item-status' => 'publish' ) );
 		$i++;
 	}
 
@@ -430,9 +430,10 @@ function menu_customizer_update_menu_item_order( $menu_id, $item_id, $order ) {
  * @param int $menu_id The ID of the menu. Required. If "0", makes the menu item a draft orphan.
  * @param int $item_id The ID of the menu item. If "0", creates a new menu item.
  * @param array $data The menu item's data to change.
+ * @param bool $clone If true, creates a copy of the item
  * @return int|WP_Error The menu item's database ID or WP_Error object on failure.
  */
-function menu_customizer_update_menu_item( $menu_id, $item_id, $data ) {
+function menu_customizer_update_menu_item( $menu_id, $item_id, $data, $clone = false ) {
 	$item = get_post( $item_id );
 	$item = wp_setup_nav_menu_item( $item );
     $defaults = array(
@@ -449,10 +450,14 @@ function menu_customizer_update_menu_item( $menu_id, $item_id, $data ) {
 		'menu-item-target' => $item->target,
 		'menu-item-classes' => implode( ' ', $item->classes ),
 		'menu-item-xfn' => $item->xfn,
-		'menu-item-status' => 'publish',
+		'menu-item-status' => $item->publish,
 	);
 
-	$args = wp_parse_args( $data, $defaults ); 
+	$args = wp_parse_args( $data, $defaults );
+
+	if ( $clone ) {
+		$item_id = 0;
+	}
 
 	return wp_update_nav_menu_item( $menu_id, $item_id, $args );
 }
