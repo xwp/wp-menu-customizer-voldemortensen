@@ -20,10 +20,10 @@
 	 * @augments Backbone.Model
 	 */
 	api.Menus.MenuItemModel = Backbone.Model.extend({
-		id: null,
 		transport: 'refresh',
 		params: [],
 		menu_item_id: null,
+		original_id: 0,
 		menu_id: 0,
 		depth: 0,
 		type: 'menu_item',
@@ -520,6 +520,7 @@
 
 			this.container.find( '.menu-item-handle' ).on( 'click', function( e ) {
 				e.preventDefault();
+				e.stopPropagation();
 				var menuControl = self.getMenuControl();
 				if ( menuControl.isReordering ) {
 					return;
@@ -678,7 +679,33 @@
 		 * @param {object} [args]
 		 */
 		updateMenuItem: function( args ) {
-			// @TODO	
+			// @TODO this is pseudo-code.
+			// var self = this, params, clone = false;
+			// Check if this menu item is cloned.
+			// if ( this.params.original_id === this.params.menu_item_id ) {
+			//	clone = true;
+			// }
+			//
+			// Trigger processing states.
+			// this.container.addClass( 'saving' );
+			// processing = api.state( 'processing' );
+			// processing( processing() + 1 );
+			//params = {
+			//	'action': 'update-menu-item-customizer',
+			//	'clone' : clone,
+			//	'item_id': self.params.menu_item_id,
+			//	'customize-menu-item-nonce': api.Menus.data.nonce,
+			//	'menu-item': item
+			//};
+
+			//$.post( ajaxurl, params, function( id ) {
+			//	if ( id && clone ) {
+			// 		// Update item control and setting accordingly with new id (or create new and delete?).
+			//		this.params.menu_item_id = id;
+			//		Replace original id of this item with cloned id in the menu setting.
+			//	}
+			//	else shouldn't need to do anything
+			//} );
 		},
 
 		/**
