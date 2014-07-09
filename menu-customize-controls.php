@@ -80,8 +80,8 @@ class WP_Menu_Item_Customize_Control extends WP_Customize_Control {
 	public $menu_id = 0;
 	public $item;
 	public $menu_item_id = 0;
+	public $original_id = 0;
 	public $depth = 0;
-	public $position = 0;
 
 	/**
 	 * Constructor.
@@ -96,7 +96,7 @@ class WP_Menu_Item_Customize_Control extends WP_Customize_Control {
 		parent::__construct( $manager, $id, $args );
 
 		$this->menu_item_id = $this->item->ID;
-		$this->position = $this->item->menu_order;
+		$this->original_id = $this->menu_item_id;
 		$this->depth = $this->depth( $this->item->menu_item_parent, 0 );
 	}
 
@@ -107,7 +107,7 @@ class WP_Menu_Item_Customize_Control extends WP_Customize_Control {
 	 */
 	public function to_json() {
 		parent::to_json();
-		$exported_properties = array( 'menu_item_id', 'menu_id', 'depth', 'position' );
+		$exported_properties = array( 'menu_item_id', 'original_id', 'menu_id', 'depth' );
 		foreach ( $exported_properties as $key ) {
 			$this->json[ $key ] = $this->$key;
 		}
