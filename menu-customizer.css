@@ -269,6 +269,12 @@
 	margin-top: 4px;
 }
 
+/* Updating Indicator */
+.nav-menu-item-wrap.saving .menu-item-handle .spinner {
+	display: inline;
+	margin-top: -1px;
+}
+
 /* Screen Options */
 #customizer-menu-screen-options-button {
     position: absolute;

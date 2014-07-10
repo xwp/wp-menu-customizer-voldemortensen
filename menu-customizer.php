@@ -675,7 +675,11 @@ function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
 		<dl class="menu-item-bar">
 			<dt class="menu-item-handle">
 				<span class="item-type"><?php echo esc_html( $item->type_label ); ?></span>
-				<span class="item-title"><span class="menu-item-title"><?php echo esc_html( $title ); ?></span><span class="is-submenu" <?php echo $submenu_text_style; ?>><?php _e( 'sub item' ); ?></span></span>
+				<span class="item-title">
+					<span class="spinner"></span>
+					<span class="menu-item-title"><?php echo esc_html( $title ); ?></span>
+					<span class="is-submenu" <?php echo $submenu_text_style; ?>><?php _e( 'sub item' ); ?></span>
+				</span>
 				<span class="item-controls">
 					<a class="item-edit" id="edit-<?php echo $item_id; ?>" title="<?php esc_attr_e('Edit Menu Item'); ?>" href="#"><?php _e( 'Edit Menu Item' ); ?></a>
 				</span>
@@ -694,7 +698,7 @@ function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
 			<p class="description description-thin">
 				<label for="edit-menu-item-title-<?php echo $item_id; ?>">
 					<?php _e( 'Navigation Label' ); ?><br />
-					<input type="text" id="edit-menu-item-title-<?php echo $item_id; ?>" class="widefat edit-menu-item-title" name="<?php echo $setting_id; ?>[title]" value="<?php echo esc_attr( $item->title ); ?>" />
+					<input type="text" id="edit-menu-item-title-<?php echo $item_id; ?>" class="widefat edit-menu-item-title" name="menu-item-title" value="<?php echo esc_attr( $item->title ); ?>" />
 				</label>
 			</p>
 			<p class="field-link-target description description-thin">
@@ -737,14 +741,7 @@ function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
 				<?php endif; ?>
 				<a class="item-delete submitdelete deletion" id="delete-menu-item-<?php echo $item_id; ?>" href="#"><?php _e( 'Remove' ); ?></a>
 			</div>
-
-			<input class="menu-item-data-menu-id" type="hidden" name="menu-item-menu-id" value="<?php echo $menu_id; ?>" />
-			<input class="menu-item-data-db-id" type="hidden" name="menu-item-db-id" value="<?php echo $item_id; ?>" />
-			<input class="menu-item-data-object-id" type="hidden" name="menu-item-object-id" value="<?php echo esc_attr( $item->object_id ); ?>" />
-			<input class="menu-item-data-object" type="hidden" name="menu-item-object" value="<?php echo esc_attr( $item->object ); ?>" />
-			<input class="menu-item-data-parent-id" type="hidden" name="menu-item-parent-id" value="<?php echo esc_attr( $item->menu_item_parent ); ?>" />
-			<input class="menu-item-data-position" type="hidden" name="menu-item-position" value="<?php echo esc_attr( $item->menu_order ); ?>" />
-			<input class="menu-item-data-type" type="hidden" name="menu-item-type" value="<?php echo esc_attr( $item->type ); ?>" />
+			<input type="hidden" name="menu-item-parent" class="menu-item-parent" id="edit-menu-item-parent-<?php echo $item_id; ?>" value="<?php echo esc_attr( $item->parent ); ?>" />
 		</div><!-- .menu-item-settings-->
 		<ul class="menu-item-transport"></ul>
 	</div>

@@ -265,7 +265,7 @@
 					items = new api.Menus.AvailableItemCollection( items ),
 					typeInner = $( '#available-menu-items-' + type + ' .accordion-section-content' );
 				items.each( function( menu_item ) {
-					typeInner.append( itemTemplate({ data: menu_item.attributes }) );					
+					typeInner.append( itemTemplate({ data: menu_item.attributes }) );
 				} );
 			} );
 		},
@@ -579,33 +579,23 @@
 		 * Set up event handlers for menu item updating.
 		 */
 		_setupUpdateUI: function() {
-			var self = this, $menuitemRoot, $menuitemContent,
+			var self = this, $menuItemRoot, $menuItemContent,
 				updateMenuItemDebounced, formSyncHandler;
 
-			$menuitemRoot = this.container.find( '.menu-item:first' );
-			$menuitemContent = $menuitemRoot.find( '.menu-item-settings:first' );
+			$menuItemRoot = this.container.find( '.menu-item:first' );
+			$menuItemContent = $menuItemRoot.find( '.menu-item-settings:first' );
 
-			updateMenuItemDebounced = _.debounce( function() {
-				self.updateMenuItem();
-			}, 250 );
-
-			// Trigger menu item form update when hitting Enter within an input.
-			$menuitemContent.on( 'keydown', 'input', function( e ) {
+			// Trigger menu item update when hitting Enter within an input.
+			$menuItemContent.on( 'keydown', 'input', function( e ) {
 				if ( 13 === e.which ) { // Enter
 					e.preventDefault();
-					self.updateMenuItem( { ignoreActiveElement: true } );
+					self.updateMenuItem();
 				}
 			} );
 
-			// Remove loading indicators when the setting is saved and the preview updates
-			this.setting.previewer.channel.bind( 'synced', function() {
-				self.container.removeClass( 'previewer-loading' );
-			} );
-
-			api.Menus.Previewer.bind( 'menu-item-updated', function( updatedMenuItemId ) {
-				if ( updatedMenuItemId === self.params.menu_item_id ) {
-					self.container.removeClass( 'previewer-loading' );
-				}
+			// Regular menu item update triggering - on change.
+			$menuItemContent.on( 'change', ':input', function( e ) {
+				self.updateMenuItem();
 			} );
 		},
 
@@ -679,33 +669,61 @@
 		 * @param {object} [args]
 		 */
 		updateMenuItem: function( args ) {
-			// @TODO this is pseudo-code.
-			// var self = this, params, clone = false;
-			// Check if this menu item is cloned.
-			// if ( this.params.original_id === this.params.menu_item_id ) {
-			//	clone = true;
-			// }
-			//
-			// Trigger processing states.
-			// this.container.addClass( 'saving' );
-			// processing = api.state( 'processing' );
-			// processing( processing() + 1 );
-			//params = {
-			//	'action': 'update-menu-item-customizer',
-			//	'clone' : clone,
-			//	'item_id': self.params.menu_item_id,
-			//	'menu-item': args,
-			//	'customize-menu-item-nonce': api.Menus.data.nonce
-			//};
+			var self = this, clone = false, processing, inputs, item, params;
+			// Check whether this menu item is cloned already; if not, let's clone it.
+			// @todo after saving we'll need to re-clone; updating the original_id at that point should be sufficient, but need to make sure keeping the actual original id in the markup, setting, etc. is okay.
+			if ( this.params.original_id === this.params.menu_item_id ) {
+				clone = true;
+			}
 
-			//$.post( ajaxurl, params, function( id ) {
-			//	if ( id && clone ) {
-			// 		// Update item control and setting accordingly with new id (or create new and delete?).
-			//		this.params.menu_item_id = id;
-			//		Replace original id of this item with cloned id in the menu setting.
-			//	}
-			//	else shouldn't need to do anything
-			//} );
+			// Trigger processing states.
+			self.container.addClass( 'saving' );
+			processing = api.state( 'processing' );
+			processing( processing() + 1 );
+
+			// Get item.
+			item = {};
+			if ( 'undefined' === typeof args ) {
+				inputs = $( self.container ).find( ':input[name]' );
+				inputs.each( function() {
+					var name = this.name;
+					item[name] = $( this ).val();
+				} );
+			} else {
+				item = args;
+			}
+
+			params = {
+				'action': 'update-menu-item-customizer',
+				'clone' : clone,
+				'item_id': self.params.menu_item_id,
+				'menu-item': item,
+				'customize-menu-item-nonce': api.Menus.data.nonce
+			};
+
+			$.post( ajaxurl, params, function( id ) {
+				var setting, menuControl, menuItemIds, i;
+				if ( id && clone ) {
+					// Update item control accordingly with new id.
+					// Note that the id is only updated where necessary - the original id
+					// is still maintained for the setting and in the UI.
+					self.params.menu_item_id = id;
+					self.id = 'nav_menus[' + self.params.menu_id + '][' + id + ']';
+
+					//Replace original id of this item with cloned id in the menu setting.
+					menuControl = api.Menus.getMenuControl( self.params.menu_id );
+
+					menuItemIds = menuControl.setting().slice();
+					i = _.indexOf( menuItemIds, self.params.original_id );
+
+					menuItemIds[i] = parseInt( id, 10 );
+					menuControl.setting( menuItemIds );
+				}
+
+				// Remove processing states.
+				self.container.removeClass( 'saving' );
+				processing( processing() - 1 );
+			} );
 		},
 
 		/**
@@ -781,7 +799,7 @@
 				$inside.slideUp( 'fast', complete );
 			}
 		},
-		
+
 		/**
 		 * Move the control's delete button up to the title bar or down to the control body.
 		 *
@@ -921,6 +939,7 @@
 
 		/**
 		 * Update ordering of menu item controls when the setting is updated.
+		 * @todo this doesn't totally work
 		 */
 		_setupModel: function() {
 			var self = this,
@@ -985,7 +1004,7 @@
 
 			/**
 			 * Update menu item order setting when controls are re-ordered.
-			
+
 			 * @TODO: logic from nav-menu.js for sub-menu depths, etc.
 			 */
 			this.$sectionContent.sortable( {
@@ -997,7 +1016,7 @@
 					var menuItemContainerIds = self.$sectionContent.sortable( 'toArray' ), menuItemIds;
 
 					menuItemIds = $.map( menuItemContainerIds, function( menuItemContainerId ) {
-						return $( '#' + menuItemContainerId ).find( ':input[name=menu-item-db-id]' ).val();
+						return parseInt( menuItemContainerId.replace( 'customize-control-nav_menus-' + self.params.menu_id + '-', '' ) );
 					} );
 
 					self.setting( menuItemIds );
@@ -1374,7 +1393,7 @@
 
 			return false;
 		},
-		
+
 		// Deletes a menu (pending user confirmation).
 		submitDelete: function( el ) {
 			var menu_id = $( el) .attr( 'id' ),
@@ -1492,7 +1511,7 @@
 		var foundControl = null;
 
 		api.control.each( function( control ) {
-			if ( control.params.type === 'menu_item' && control.params.menu_item_id === menuItemId ) {
+			if ( control.params.type === 'menu_item' && control.params.menu_item_id == menuItemId ) {
 				foundControl = control;
 			}
 		} );
@@ -1536,7 +1555,7 @@
 				title.html( name );
 			}
 		} );
-		$( '#accordion-section-menus' ).on( 'input', '.edit-menu-item-title', function(e) { 
+		$( '#accordion-section-menus' ).on( 'input', '.edit-menu-item-title', function(e) {
 			var input = $( e.currentTarget ), title, titleEl;
 			title = input.val();
 			titleEl = input.closest( '.menu-item' ).find( '.menu-item-title' );
