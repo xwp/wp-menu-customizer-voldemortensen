@@ -669,11 +669,11 @@
 		 * @param {object} [args]
 		 */
 		updateMenuItem: function( args ) {
-			var self = this, clone = false, processing, inputs, item, params;
+			var self = this, clone = 0, processing, inputs, item, params;
 			// Check whether this menu item is cloned already; if not, let's clone it.
 			// @todo after saving we'll need to re-clone; updating the original_id at that point should be sufficient, but need to make sure keeping the actual original id in the markup, setting, etc. is okay.
 			if ( this.params.original_id === this.params.menu_item_id ) {
-				clone = true;
+				clone = 1;
 			}
 
 			// Trigger processing states.
@@ -1207,6 +1207,7 @@
 						},
 						menu_id: self.params.menu_id,
 						menu_item_id: dbid,
+						original_id: 0, // Set to 0 to avoid cloning when updated before publish.
 						type: 'menu_item',
 						depth: 0,
 						position: self.setting._value.length
