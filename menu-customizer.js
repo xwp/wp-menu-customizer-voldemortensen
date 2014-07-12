@@ -597,6 +597,10 @@
 			$menuItemContent.on( 'change', ':input', function( e ) {
 				self.updateMenuItem();
 			} );
+			// @todo figure out how this is supposed to work - it doesn't
+			//api.on( 'save', function() {
+				// Update original_id to menu_item_id, initiating new clones as needed.
+			//} );
 		},
 
 		/**
@@ -652,7 +656,7 @@
 		getMenuControl: function() {
 			var settingId, menuControl;
 
-			settingId = 'nav_menus[' + this.params.menu_id + '][controls]';
+			settingId = 'nav_menu_' + this.params.menu_id;
 			menuControl = api.control( settingId );
 
 			if ( ! menuControl ) {
@@ -819,6 +823,12 @@
 				actions.append( button );
 			}
 		},
+
+		/**
+		 * Override the default toggle function, which is deactivating added menu items.
+		 * @todo: fix that problem instead of doing this.
+		 */
+		toggle: function() {},
 
 		/**
 		 * Expand the containing menu section, expand the form, and focus on
@@ -1144,7 +1154,7 @@
 				placeholderContainer,
 				processing,
 				menuId = self.params.menu_id,
-				menuControl = $( '#customize-control-nav_menus-' + menuId + '-controls' );
+				menuControl = $( '#customize-control-nav_menu_' + menuId );
 
 			_.templateSettings = {
 				interpolate: /\{\{(.+?)\}\}/g
@@ -1179,7 +1189,7 @@
 					placeholderContainer.fadeOut( 'slow', function() { $( this ).remove(); } );
 					return;
 				}
-				dbid = dbid.replace( 'menu-item-', '' );
+				dbid = parseInt( dbid.replace( 'menu-item-', '' ) );
 
 				// Replace the placeholder with the control markup.
 				placeholderContainer.html( menuItemMarkup )
@@ -1202,6 +1212,7 @@
 				controlConstructor = api.controlConstructor['menu_item'];
 				menuItemControl = new controlConstructor( settingId, {
 					params: {
+						active: true,
 						settings: {
 							'default': settingId
 						},
@@ -1332,7 +1343,7 @@
 					previewer: self.setting.previewer
 				};
 				api.create( settingIdName, settingIdName, {}, settingArgs );
-				settingIdControls = 'nav_menus[' + menu_id + '][controls]';
+				settingIdControls = 'nav_menu_' + menu_id;
 				api.create( settingIdControls, settingIdControls, {}, settingArgs );
 				settingIdAuto = 'nav_menus[' + menu_id + '][auto_add]';
 				api.create( settingIdAuto, settingIdAuto, {}, settingArgs );
@@ -1475,7 +1486,7 @@
 	api.Menus.getMenuControl = function( menu_id ) {
 		var settingId, menuControl;
 
-		settingId = 'nav_menus[' + menu_id + '][controls]';
+		settingId = 'nav_menu_' + menu_id;
 		menuControl = api.control( settingId );
 
 		if ( ! menuControl ) {

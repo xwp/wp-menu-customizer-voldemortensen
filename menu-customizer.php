@@ -211,7 +211,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 		}
 
 		// Add the menu control, which handles adding and ordering.
-		$nav_menu_setting_id = $section_id . '[controls]';
+		$nav_menu_setting_id = 'nav_menu_' . $menu_id;
 		$wp_customize->add_setting( $nav_menu_setting_id, array(
 			'type'    => 'nav_menu',
 			'default' => $item_ids,
@@ -367,8 +367,17 @@ add_action( 'customize_update_menu_autoadd', 'menu_customizer_update_menu_autoad
  * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
  */
 function menu_customizer_update_nav_menu( $value, $setting ) {
-	$menu_id = str_replace( 'nav_menus[', '', $setting->id );
-	$menu_id = absint( str_replace( '][controls]', '', $menu_id ) );
+	$menu_id = str_replace( 'nav_menu_', '', $setting->id );
+
+	// Ensure that $menu_id is valid.
+	$menu_id = (int) $menu_id;
+	$menu = wp_get_nav_menu_object( $menu_id );
+	if ( ! $menu || ! $menu_id ) {
+		return new WP_Error( 'invalid_menu_id', __( 'Invalid menu ID.' ) );
+	}
+	if ( is_wp_error( $menu ) ) {
+		return $menu;
+	}
 
 	// Get original items in this menu. Any that aren't there anymore need to be deleted.
 	$originals = wp_get_nav_menu_items( $menu_id );
@@ -392,7 +401,7 @@ function menu_customizer_update_nav_menu( $value, $setting ) {
 	$i = 1;
 	foreach( $items as $item_id ) {
 		// Assign the existing item to this menu, in case it's orphaned. Update the order, regardless.
-		menu_customizer_update_menu_item( $menu_id, $item_id, array( 'menu-item-position' => $i, 'menu-item-status' => 'publish' ) );
+		menu_customizer_update_menu_item_order( $menu_id, $item_id, $i );
 		$i++;
 	}
 
@@ -405,10 +414,13 @@ function menu_customizer_update_nav_menu( $value, $setting ) {
 add_action( 'customize_update_nav_menu', 'menu_customizer_update_nav_menu', 10, 2 );
 
 /**
- * Update the order for and publishes a menu item.
+ * Updates the order for and publishes an existing menu item.
  *
  * Skips the mess that is wp_update_nav_menu_item() and avoids getting 
  * and messing with menu item fields that are not changed.
+ *
+ * Based on the parts of wp_update_nav_menu_item() that are needed here.
+ * $menu_id must already be validated before running this function (to avoid re-validating for each item in the menu).
  *
  * @param int $menu_id The ID of the menu. Required.
  * @param int $item_id The ID of the (existing) menu item.
@@ -416,11 +428,34 @@ add_action( 'customize_update_nav_menu', 'menu_customizer_update_nav_menu', 10, 
  * @return int|WP_Error The menu item's database ID or WP_Error object on failure.
  */
 function menu_customizer_update_menu_item_order( $menu_id, $item_id, $order ) {
-	// @todo
+	$item_id = (int) $item_id;
+
+	// Make sure that we don't convert non-nav_menu_item objects into nav_menu_item objects.
+	if ( ! empty( $item_id ) && ! is_nav_menu_item( $item_id ) ) {
+		return new WP_Error( 'update_nav_menu_item_failed', __( 'The given object ID is not that of a menu item.' ) );
+	}
+
+	// Associate the menu item with the menu term.
+	// Only set the menu term if it isn't set to avoid unnecessary wp_get_object_terms().
+	 if ( $menu_id && ! is_object_in_term( $item_id, 'nav_menu', (int) $menu_id ) ) {
+		wp_set_object_terms( $item_id, array( $menu_id ), 'nav_menu' );
+	}
+
+	// Populate the menu item object
+	$post = array(
+		'ID'          => $item_id,
+		'menu_order'  => $order,
+		'post_status' => 'publish'
+	);
+
+	// Update the menu item object.
+	wp_update_post( $post );
+
+	return $item_id;
 }
 
 /**
- * Update properties of a nav menu item.
+ * Update properties of a nav menu item, with the option to create a clone of the item.
  *
  * Wrapper for wp_update_nav_menu_item() that only requires passing changed properties.
  * @link https://core.trac.wordpress.org/ticket/28138
@@ -430,7 +465,7 @@ function menu_customizer_update_menu_item_order( $menu_id, $item_id, $order ) {
  * @param int $menu_id The ID of the menu. Required. If "0", makes the menu item a draft orphan.
  * @param int $item_id The ID of the menu item. If "0", creates a new menu item.
  * @param array $data The menu item's data to change.
- * @param bool $clone If true, creates a copy of the item
+ * @param bool $clone If true, creates a copy of the item and only changes the copy.
  * @return int|WP_Error The menu item's database ID or WP_Error object on failure.
  */
 function menu_customizer_update_menu_item( $menu_id, $item_id, $data, $clone = false ) {
@@ -767,7 +802,7 @@ function menu_customizer_render_new_menu( $menu_id, $menu_name ) {
 					<input type="text" value="<?php echo $menu_name; ?>" data-customize-setting-link="nav_menus[<?php echo $menu_id; ?>][name]">
 				</label>
 			</li>
-			<li id="customize-control-nav_menus-<?php echo $menu_id; ?>-controls" class="customize-control customize-control-nav_menu">
+			<li id="customize-control-nav_menu_<?php echo $menu_id; ?>" class="customize-control customize-control-nav_menu">
 				<span class="button-secondary add-new-menu-item" tabindex="0"><?php _e( 'Add Links' ); ?></span>
 				<span class="add-menu-item-loading spinner" style="display: none;"></span>
 				<span class="reorder-toggle" tabindex="0">
