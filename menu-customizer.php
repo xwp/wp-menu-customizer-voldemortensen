@@ -175,28 +175,11 @@ function menu_customizer_customize_register( $wp_customize ) {
 		foreach( $menu_items as $i => $item ) {
 			$item_ids[] = $item->ID;
 
-			// Setup default item data.
-			$data = array(
-				'menu_item_id'     => $item->ID,
-				'menu_id'          => $menu_id,
-				'title'            => $item->title,
-				'target'           => $item->target,
-				'attr_title'       => $item->attr_title,
-				'classes'          => $item->classes,
-				'xfn'              => $item->xfn,
-				'description'      => $item->description,
-				'object_id'        => $item->object_id,
-				'object'           => $item->object,
-				'menu_item_parent' => $item->menu_item_parent,
-				'menu_order'       => $item->menu_order,
-				'type'             => $item->type,
-			);
-
-			// Create a setting for each menu item.
+			// Create a setting for each menu item (which doesn't actually manage data, currently).
 			$menu_item_setting_id = $section_id . '[' . $item->ID . ']';
 			$wp_customize->add_setting( $menu_item_setting_id, array(
 				'type' => 'option',
-				'default' => $data,
+				'default' => array(),
 			) );
 
 			// Create a control for each menu item.
