@@ -3,7 +3,7 @@ Contributors: celloexpressions
 Tags: menus, custom menus, customizer, theme customizer, gsoc
 Requires at least: 4.0-beta1
 Tested up to: 4.0
-Stable tag: 0.0.4
+Stable tag: 0.0.5
 Description: Manage your Custom Menus with the Customizer. GSoC Project in ALPHA development.
 License: GPLv2
 
