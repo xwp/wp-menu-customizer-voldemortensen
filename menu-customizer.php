@@ -397,6 +397,33 @@ function menu_customizer_update_nav_menu( $value, $setting ) {
 add_action( 'customize_update_nav_menu', 'menu_customizer_update_nav_menu', 10, 2 );
 
 /**
+ * Preview changes made to a nav menu.
+ *
+ * Filters nav menu display to show customized items in the customized order.
+ *
+ * @since Menu Customizer 0.0
+ *
+ * @param array $value Array of the menu items to preview, in order.
+ * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
+ */
+function menu_customizer_preview_nav_menu( $value, $setting ) {
+	$menu_id = str_replace( 'nav_menu_', '', $setting->id );
+
+	// Ensure that $menu_id is valid.
+	$menu_id = (int) $menu_id;
+	$menu = wp_get_nav_menu_object( $menu_id );
+	if ( ! $menu || ! $menu_id ) {
+		return new WP_Error( 'invalid_menu_id', __( 'Invalid menu ID.' ) );
+	}
+	if ( is_wp_error( $menu ) ) {
+		return $menu;
+	}
+
+	// @todo filter something in nav menus where it gets the ids, and change their order there too
+}
+add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 2 );
+
+/**
  * Updates the order for and publishes an existing menu item.
  *
  * Skips the mess that is wp_update_nav_menu_item() and avoids getting 
