@@ -597,10 +597,11 @@
 			$menuItemContent.on( 'change', ':input', function( e ) {
 				self.updateMenuItem();
 			} );
-			// @todo figure out how this is supposed to work - it doesn't
-			//api.on( 'save', function() {
-				// Update original_id to menu_item_id, initiating new clones as needed.
-			//} );
+
+			// When saving, update original_id to menu_item_id, initiating new clones as needed.
+			api.bind( 'save', function() {
+				self.params.original_id = self.params.menu_item_id;
+			} );
 		},
 
 		/**
