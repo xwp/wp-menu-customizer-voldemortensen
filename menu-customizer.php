@@ -406,7 +406,8 @@ add_action( 'customize_update_nav_menu', 'menu_customizer_update_nav_menu', 10, 
  * @param array $value Array of the menu items to preview, in order.
  * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
  */
-function menu_customizer_preview_nav_menu( $value, $setting ) {
+function menu_customizer_preview_nav_menu( $setting ) {
+	
 	$menu_id = str_replace( 'nav_menu_', '', $setting->id );
 
 	// Ensure that $menu_id is valid.
@@ -419,9 +420,28 @@ function menu_customizer_preview_nav_menu( $value, $setting ) {
 		return $menu;
 	}
 
-	// @todo filter something in nav menus where it gets the ids, and change their order there too
+	// @todo actual function, pass the value to the filter function
+	add_filter( 'wp_get_nav_menu_items', function( $items, $menu, $args ) {
+		$preview_menu_id = $menu->id;
+		if ( $menu_id == $preview_menu_id ) {
+			$new_ids = $setting->post_value();
+			$new_items = array();
+			$i = 0;
+			// for each item, get object, update menu order property
+			foreach ( $new_ids as $item_id ) {
+				$item = get_post( $item_id );
+				$item = wp_setup_nav_menu_item( $item );
+				$item['menu_order'] = $i;
+				$new_items[] = $item;
+				$i++;
+			}
+			return $new_items;
+		} else {
+			return $items;
+		}
+	} );
 }
-add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 2 );
+add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 1 );
 
 /**
  * Updates the order for and publishes an existing menu item.
