@@ -116,7 +116,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 		$wp_customize->add_panel( 'menus', array(
 			'title'       => __( 'Menus' ),
 			'description' => __( '<p>This screen is used for managing your custom navigation menus.</p><p>Menus can be displayed in locations defined by your theme, even used in sidebars by adding a “Custom Menu” widget on the Widgets screen.</p>' ),
-			'priority'    => 60,
+			'priority'    => 100,
 		) );
 	}
 
