@@ -114,8 +114,9 @@ function menu_customizer_customize_register( $wp_customize ) {
 	// @requires WordPress 4.0-alpha-r28861 or newer.
 	if ( method_exists( 'WP_Customize_Manager', 'add_panel' ) ) {
 		$wp_customize->add_panel( 'menus', array(
-			'title' => __( 'Menus' ),
+			'title'       => __( 'Menus' ),
 			'description' => __( '<p>This screen is used for managing your custom navigation menus.</p><p>Menus can be displayed in locations defined by your theme, even used in sidebars by adding a “Custom Menu” widget on the Widgets screen.</p>' ),
+			'priority'    => 60,
 		) );
 	}
 
@@ -427,7 +428,7 @@ function menu_customizer_preview_nav_menu( $setting ) {
 			$new_ids = $setting->post_value();
 			$new_items = array();
 			$i = 0;
-			// for each item, get object, update menu order property
+			// For each item, get object and update menu order property.
 			foreach ( $new_ids as $item_id ) {
 				$item = get_post( $item_id );
 				$item = wp_setup_nav_menu_item( $item );
