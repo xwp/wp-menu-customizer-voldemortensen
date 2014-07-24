@@ -42,38 +42,6 @@ function menu_customizer_enqueue() {
 	wp_enqueue_script( 'menu-customizer-options', plugin_dir_url( __FILE__ ) . 'menu-customizer-options.js', array( 'jquery' ) );
 	wp_enqueue_script( 'menu-customizer', plugin_dir_url( __FILE__ ) . 'menu-customizer.js', array( 'jquery', 'wp-backbone', 'customize-controls' ) );
 
-	$menuitem_reorder_nav_tpl = sprintf(
-		'<div class="menu-item-reorder-nav"><span class="menus-move-up" tabindex="0">%1$s</span><span class="menus-move-down" tabindex="0">%2$s</span><span class="menus-move-left" tabindex="0">%3$s</span><span class="menus-move-right" tabindex="0">%4$s</span></div>',
-		__( 'Move up' ),
-		__( 'Move down' ),
-		__( 'Move one level up' ),
-		__( 'Move one level down' )
-	);
-
-	$available_item_tpl = '
-		<div id="menu-item-tpl-{{ data.id }}" class="menu-item-tpl" data-menu-item-id="{{ data.id }}">
-			<dl class="menu-item-bar">
-				<dt class="menu-item-handle">
-					<span class="item-type">{{ data.type_label }}</span>
-					<span class="item-title">{{ data.name }}</span>
-					<a class="item-add" href="#">Add Menu Item</a>
-				</dt>
-			</dl>
-		</div>';
-
-	$loading_item_tpl = '
-		<li class="nav-menu-inserted-item-loading added-menu-item added-dbid-{{ data.id }} customize-control customize-control-menu_item nav-menu-item-wrap">
-			<div class="menu-item menu-item-depth-0 menu-item-edit-inactive">
-				<dl class="menu-item-bar">
-					<dt class="menu-item-handle">
-						<span class="spinner" style="display: block;"></span>
-						<span class="item-type">{{ data.type_label }}</span>
-						<span class="item-title menu-item-title">{{ data.name }}</span>
-					</dt>
-				</dl>
-			</div>
-		</li>';
-
 	global $wp_scripts;
 
 	// Pass data to JS.
@@ -86,11 +54,6 @@ function menu_customizer_enqueue() {
 			'untitled'     => _x( '(no label)', 'Missing menu item navigation label.' ),
 			'custom_label' => _x( 'Custom', 'Custom menu item type label.' ),
 			'deleteWarn'   => __( 'You are about to permanently delete this menu. "Cancel" to stop, "OK" to delete. ' ),
-		),
-		'tpl'                => array(
-			'menuitemReorderNav'  => $menuitem_reorder_nav_tpl,
-			'availableMenuItem'   => $available_item_tpl,
-			'loadingItemTemplate' => $loading_item_tpl,
 		),
 	);
 
@@ -621,6 +584,61 @@ function menu_customizer_available_item_types() {
 	return array_merge( $types, $taxes );
 }
 
+/**
+ * Print the JavaScript templates used to render Menu Customizer components.
+ *
+ * Templates are imported into the JS using wp.template.
+ *
+ * @since Menu Customizer 0.0
+ */
+function menu_customizer_print_templates() {
+	?>
+	<script type="text/html" id="tmpl-available-menu-item">
+		<div id="menu-item-tpl-{{ data.id }}" class="menu-item-tpl" data-menu-item-id="{{ data.id }}">
+			<dl class="menu-item-bar">
+				<dt class="menu-item-handle">
+					<span class="item-type">{{ data.type_label }}</span>
+					<span class="item-title">{{ data.name }}</span>
+					<a class="item-add" href="#">Add Menu Item</a>
+				</dt>
+			</dl>
+		</div>
+	</script>
+
+	<script type="text/html" id="tmpl-loading-menu-item">
+		<li class="nav-menu-inserted-item-loading added-menu-item added-dbid-{{ data.id }} customize-control customize-control-menu_item nav-menu-item-wrap">
+			<div class="menu-item menu-item-depth-0 menu-item-edit-inactive">
+				<dl class="menu-item-bar">
+					<dt class="menu-item-handle">
+						<span class="spinner" style="display: block;"></span>
+						<span class="item-type">{{ data.type_label }}</span>
+						<span class="item-title menu-item-title">{{ data.name }}</span>
+					</dt>
+				</dl>
+			</div>
+		</li>
+	</script>
+
+	<script type="text/html" id="tmpl-menu-item-reorder-nav">
+		<div class="menu-item-reorder-nav">
+			<?php printf(
+				'<span class="menus-move-up" tabindex="0">%1$s</span><span class="menus-move-down" tabindex="0">%2$s</span><span class="menus-move-left" tabindex="0">%3$s</span><span class="menus-move-right" tabindex="0">%4$s</span>',
+				__( 'Move up' ),
+				__( 'Move down' ),
+				__( 'Move one level up' ),
+				__( 'Move one level down' )
+			); ?>
+		</div>			
+	</script>
+<?php
+}
+add_action( 'customize_controls_print_footer_scripts', 'menu_customizer_print_templates' );
+
+/**
+ * Print the html template used to render the add-menu-item frame.
+ *
+ * @since Menu Customizer 0.0
+ */
 function menu_customizer_available_items_template() {
 ?>
 	<div id="available-menu-items" class="accordion-container">

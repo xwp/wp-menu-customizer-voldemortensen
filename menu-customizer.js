@@ -249,14 +249,12 @@
 			var searchInner = $( '#available-menu-items-search .accordion-section-content' ),
 				self = this,
 				itemTemplate;
-			_.templateSettings = {
-				interpolate: /\{\{(.+?)\}\}/g
-			};
-			itemTemplate = _.template( api.Menus.data.tpl.availableMenuItem );
+
+			itemTemplate = wp.template( 'available-menu-item' );
 
 			// Render the template for each menu item in the search section.
 			self.collection.each( function( menu_item ) {
-				searchInner.append( itemTemplate({ data: menu_item.attributes }) );
+				searchInner.append( itemTemplate( menu_item.attributes ) );
 			});
 
 			// Render the template for each item by type.
@@ -265,7 +263,7 @@
 					items = new api.Menus.AvailableItemCollection( items ),
 					typeInner = $( '#available-menu-items-' + type + ' .accordion-section-content' );
 				items.each( function( menu_item ) {
-					typeInner.append( itemTemplate({ data: menu_item.attributes }) );
+					typeInner.append( itemTemplate( menu_item.attributes ) );
 				} );
 			} );
 		},
@@ -533,13 +531,15 @@
 		 * Set up the menu-item-reorder-nav
 		 */
 		_setupReorderUI: function() {
-			var self = this, selectMenu,
+			var self = this, selectMenu, template,
 				$reorderNav, updateAvailableMenus;
+
+			template = wp.template( 'menu-item-reorder-nav' );
 
 			/**
 			 * Add the menu item reordering elements to the menu item control.
 			 */
-			this.container.find( '.item-controls' ).after( $( api.Menus.data.tpl.menuitemReorderNav ) );
+			this.container.find( '.item-controls' ).after( template );
 
 			/**
 			 * Handle clicks for up/down/left-right on the reorder nav.
@@ -1157,13 +1157,10 @@
 				menuId = self.params.menu_id,
 				menuControl = $( '#customize-control-nav_menu_' + menuId );
 
-			_.templateSettings = {
-				interpolate: /\{\{(.+?)\}\}/g
-			};
-			placeholderTemplate = _.template( api.Menus.data.tpl.loadingItemTemplate );
+			placeholderTemplate = wp.template( 'loading-menu-item' );
 
 			// Insert a placeholder menu item into the menu.
-			menuControl.before( placeholderTemplate({ data: item }) );
+			menuControl.before( placeholderTemplate( item ) );
 
 			placeholderContainer = menuControl.prev( '.nav-menu-inserted-item-loading' );
 
