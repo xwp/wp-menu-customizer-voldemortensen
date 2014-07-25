@@ -194,7 +194,6 @@
 				this.initList();
 				this.rendered = true;
 			}
-			this.updateList();
 
 			// If the available menu items panel is open and the customize controls are
 			// interacted with (other than an item being deleted), then close the
@@ -265,17 +264,6 @@
 				items.each( function( menu_item ) {
 					typeInner.append( itemTemplate( menu_item.attributes ) );
 				} );
-			} );
-		},
-
-		// Changes visibility of available menu items.
-		updateList: function() {
-			this.collection.each( function( menu_item ) {
-				var menuitemTpl = $( '#menu-item-tpl-' + menu_item.id );
-				menuitemTpl.toggle( menu_item.get( 'search_matched' ) );
-				if ( ! menu_item.get( 'search_matched' ) && menuitemTpl.is( this.selected ) ) {
-					this.selected = null;
-				}
 			} );
 		},
 
