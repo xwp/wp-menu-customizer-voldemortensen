@@ -475,7 +475,7 @@
 
 #available-menu-items {
 	position: absolute;
-	overflow: auto;
+	overflow: hidden;
 	top: 0;
 	bottom: 0;
 	left: -301px;
@@ -495,6 +495,11 @@
 
 #available-menu-items .open .accordion-section-title {
 	background: #fff;
+}
+
+#available-menu-items .accordion-section-content {
+	overflow-y: auto;
+	max-height: 200px; /* This gets set in JS to fit the screen size, and based on # of sections. */
 }
 
 #available-menu-items-search .accordion-section-title {

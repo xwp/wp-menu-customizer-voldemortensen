@@ -267,6 +267,15 @@
 			} );
 		},
 
+		// Adjust the height of each section of items to fit the screen.
+		itemSectionHeight: function() {
+			var sections, totalHeight, accordionHeight;
+			totalHeight = window.innerHeight;
+			sections = this.$el.find( '.accordion-section-content' );
+			accordionHeight =  46 * ( 1 + sections.length ) - 1;
+			sections.css( 'max-height', totalHeight - accordionHeight );
+		},
+
 		// Highlights a meun item.
 		select: function( menuitemTpl ) {
 			this.selected = $( menuitemTpl );
@@ -358,6 +367,8 @@
 		open: function( menuControl ) {
 			this.toggleLoading(true);
 			this.currentMenuControl = menuControl;
+
+			this.itemSectionHeight();
 
 			$( 'body' ).addClass( 'adding-menu-items' );
 
