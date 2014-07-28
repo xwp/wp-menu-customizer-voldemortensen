@@ -78,7 +78,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 	if ( method_exists( 'WP_Customize_Manager', 'add_panel' ) ) {
 		$wp_customize->add_panel( 'menus', array(
 			'title'       => __( 'Menus' ),
-			'description' => __( '<p>This screen is used for managing your custom navigation menus.</p><p>Menus can be displayed in locations defined by your theme, even used in sidebars by adding a “Custom Menu” widget on the Widgets screen.</p>' ),
+			'description' => __( '<p>This screen is used for managing your custom navigation menus. You can add pages, posts, categories, tags, and custom links to your menus.</p><p>Menus can be displayed in locations defined by your theme, and also used in sidebars by adding a "Custom Menu" widget on the Widgets screen.</p>' ),
 			'priority'    => 100,
 		) );
 	}
