@@ -12,7 +12,7 @@ This plugin is a WordPress Google Summer of Code 2014 project. See the <a href="
 
 The Menu Customizer adds custom menu management to the Customizer. It is not fully functional and in alpha development until further notice; please don't try to run it on a production site. The plugin requires WordPress 4.0 beta 1 or higher, as it utilizes new functionalities added in 4.0. Once the plugin hits version 0.1, it will be at the initial feature-complete stage and ready for full testing. Until then, consider it a preview of things to come, but don't expect things to be at 100% :)
 
-Menu Customizer currently requires PHP 5.4 or higher.
+Menu Customizer currently requires PHP 5.3 or higher.
 
 = Core Patches =
 Several improvements to the Customizer are also in the works as a part of this project, in the form of core patches (for example, the Panels API). See <a href="http://make.wordpress.org/core/2014/07/08/customizer-improvements-in-4-0/">Customizer Improvements in 4.0</a>, and an upcomming Customizer Roadmap for details.
