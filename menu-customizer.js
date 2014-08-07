@@ -675,7 +675,6 @@
 		updateMenuItem: function( args ) {
 			var self = this, clone = 0, processing, inputs, item, params;
 			// Check whether this menu item is cloned already; if not, let's clone it.
-			// @todo after saving we'll need to re-clone; updating the original_id at that point should be sufficient, but need to make sure keeping the actual original id in the markup, setting, etc. is okay.
 			if ( this.params.original_id === this.params.menu_item_id ) {
 				clone = 1;
 			}
@@ -825,12 +824,6 @@
 		},
 
 		/**
-		 * Override the default toggle function, which is deactivating added menu items.
-		 * @todo: fix that problem instead of doing this.
-		 */
-		toggle: function() {},
-
-		/**
 		 * Expand the containing menu section, expand the form, and focus on
 		 * the first input in the control.
 		 */
@@ -949,7 +942,6 @@
 
 		/**
 		 * Update ordering of menu item controls when the setting is updated.
-		 * @todo this doesn't totally work
 		 */
 		_setupModel: function() {
 			var self = this,
