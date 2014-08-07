@@ -371,7 +371,7 @@ add_action( 'customize_update_nav_menu', 'menu_customizer_update_nav_menu', 10, 
  * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
  */
 function menu_customizer_preview_nav_menu( $setting ) {
-	
+
 	$menu_id = str_replace( 'nav_menu_', '', $setting->id );
 
 	// Ensure that $menu_id is valid.
@@ -384,9 +384,11 @@ function menu_customizer_preview_nav_menu( $setting ) {
 		return $menu;
 	}
 
-	// @todo actual function, pass the value to the filter function
-	add_filter( 'wp_get_nav_menu_items', function( $items, $menu, $args ) {
-		$preview_menu_id = $menu->id;
+	$menu_id = $menu->term_id;
+
+	// @todo don't use a closure for PHP 5.2
+	add_filter( 'wp_get_nav_menu_items', function( $items, $menu, $args ) use ( $menu_id, $setting ) {
+		$preview_menu_id = $menu->term_id;
 		if ( $menu_id == $preview_menu_id ) {
 			$new_ids = $setting->post_value();
 			$new_items = array();
@@ -395,7 +397,7 @@ function menu_customizer_preview_nav_menu( $setting ) {
 			foreach ( $new_ids as $item_id ) {
 				$item = get_post( $item_id );
 				$item = wp_setup_nav_menu_item( $item );
-				$item['menu_order'] = $i;
+				$item->menu_order = $i;
 				$new_items[] = $item;
 				$i++;
 			}
@@ -403,9 +405,28 @@ function menu_customizer_preview_nav_menu( $setting ) {
 		} else {
 			return $items;
 		}
-	} );
+	}, 10, 3 );
 }
-add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 1 );
+
+/**
+ * Adds hooks for previewing each menu.
+ *
+ * Necessary because of a poorly thought-out hook in core.
+ */
+function menu_customizer_setup_menu_previewing() {
+//	@todo Core: the hook should *really* be customize_preview_$setting->type, not $setting->id.
+//	add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 1 );
+
+	$menus = wp_get_nav_menus();
+
+	foreach ( $menus as $menu ) {
+		$menu_id = $menu->term_id;
+
+		$setting_id = 'nav_menu_' . $menu_id;
+		add_action( 'customize_preview_' . $setting_id, 'menu_customizer_preview_nav_menu', 10, 1 );
+	}
+}
+add_action( 'customize_register', 'menu_customizer_setup_menu_previewing' );
 
 /**
  * Updates the order for and publishes an existing menu item.
@@ -602,6 +623,14 @@ function menu_customizer_print_templates() {
 					<a class="item-add" href="#">Add Menu Item</a>
 				</dt>
 			</dl>
+		</div>
+	</script>
+
+	<script type="text/html" id="tmpl-available-menu-item-type">
+		<div id="available-menu-items-{{ data.type }}" class="accordion-section">
+			<h4 class="accordion-section-title">{{ data.type_label }}</h4>
+			<div class="accordion-section-content">
+			</div>
 		</div>
 	</script>
 
