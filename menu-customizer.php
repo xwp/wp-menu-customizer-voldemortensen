@@ -777,21 +777,15 @@ function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
 		$title = sprintf( __('%s (Pending)'), $item->title );
 	}
 	$title = ( ! isset( $item->label ) || '' == $item->label ) ? $title : $item->label;
-
-	$submenu_text_style = '';
-	if ( 0 == $depth ) {
-		$submenu_text_style = 'style="display: none;"';
-	}
-
 	?>
-	<div id="menu-item-<?php echo $item_id; ?>" class="<?php echo implode(' ', $classes ); ?>">
+	<div id="menu-item-<?php echo $item_id; ?>" class="<?php echo implode(' ', $classes ); ?>" data-item-depth="<?php echo $depth; ?>">
 		<dl class="menu-item-bar">
 			<dt class="menu-item-handle">
 				<span class="item-type"><?php echo esc_html( $item->type_label ); ?></span>
 				<span class="item-title">
 					<span class="spinner"></span>
 					<span class="menu-item-title"><?php echo esc_html( $title ); ?></span>
-					<span class="is-submenu" <?php echo $submenu_text_style; ?>><?php _e( 'sub item' ); ?></span>
+					<span class="is-submenu"><?php _e( 'sub item' ); ?></span>
 				</span>
 				<span class="item-controls">
 					<a class="item-edit" id="edit-<?php echo $item_id; ?>" title="<?php esc_attr_e('Edit Menu Item'); ?>" href="#"><?php _e( 'Edit Menu Item' ); ?></a>

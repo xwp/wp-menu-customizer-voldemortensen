@@ -50,6 +50,10 @@
 	display: inline-block;
 }
 
+.menu-item-depth-0 .is-submenu {
+	display: none;
+}
+
 .wp-customizer .menu-item-settings {
 	max-width: 100%;
 	overflow: hidden;
