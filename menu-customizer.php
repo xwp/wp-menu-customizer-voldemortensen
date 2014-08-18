@@ -848,7 +848,7 @@ function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
 				<?php endif; ?>
 				<a class="item-delete submitdelete deletion" id="delete-menu-item-<?php echo $item_id; ?>" href="#"><?php _e( 'Remove' ); ?></a>
 			</div>
-			<input type="hidden" name="menu-item-parent" class="menu-item-parent" id="edit-menu-item-parent-<?php echo $item_id; ?>" value="<?php echo esc_attr( $item->parent ); ?>" />
+			<input type="hidden" name="menu-item-parent-id" class="menu-item-parent-id" id="edit-menu-item-parent-id-<?php echo $item_id; ?>" value="<?php echo esc_attr( $item->parent ); ?>" />
 		</div><!-- .menu-item-settings-->
 		<ul class="menu-item-transport"></ul>
 	</div>

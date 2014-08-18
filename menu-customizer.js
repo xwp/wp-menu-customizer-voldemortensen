@@ -544,7 +544,7 @@
 			 * Handle clicks for up/down/left-right on the reorder nav.
 			 */
 			$reorderNav = this.container.find( '.menu-item-reorder-nav' );
-			$reorderNav.find( '.menus-move-up, .menus-move-down, .menus-move-left, .menu-move-right' ).on( 'click keypress', function( event ) {
+			$reorderNav.find( '.menus-move-up, .menus-move-down, .menus-move-left, .menus-move-right' ).on( 'click keypress', function( event ) {
 				if ( event.type === 'keypress' && ( event.which !== 13 && event.which !== 32 ) ) {
 					return;
 				}
@@ -710,7 +710,7 @@
 					// Update item control accordingly with new id.
 					// Note that the id is only updated where necessary - the original id
 					// is still maintained for the setting and in the UI.
-					self.params.menu_item_id = id;
+					self.params.menu_item_id = parseInt( id, 10 );
 					self.id = 'nav_menus[' + self.params.menu_id + '][' + id + ']';
 
 					//Replace original id of this item with cloned id in the menu setting.
@@ -721,6 +721,8 @@
 
 					menuItemIds[i] = parseInt( id, 10 );
 					menuControl.setting( menuItemIds );
+				} else {
+					// @todo trigger a preview refresh.
 				}
 
 				// Remove processing states.
@@ -852,6 +854,15 @@
 		},
 
 		/**
+		 * Get the position (index) of the item in the containing menu.
+		 *
+		 * @returns {Number}
+		 */
+		getMenuItemDepth: function() {
+			return this.params.depth;
+		},
+
+		/**
 		 * Move menu item up one in the menu.
 		 */
 		moveUp: function() {
@@ -913,6 +924,92 @@
 			menuItemIds[i] = adjacentMenuItemId;
 
 			menuSetting( menuItemIds );
+
+			// @todo update menu item parents and depth if necessary based on new previous item.
+		},
+
+		/**
+		 * @private
+		 *
+		 * @param {Number} offset 1|-1
+		 */
+		_moveMenuItemDepthByOne: function( offset ) {
+			var depth, i, ii, parentId, parentControl, menuSetting, menuItemIds, previousMenuItemId, previousMenuItem;
+
+			depth = this.getMenuItemDepth();
+			i = this.getMenuItemPosition();
+			
+			if ( 0 === i ) {
+				// First item can never be moved into or out of a sub-menu.
+				return;
+			}
+
+			menuSetting = this.getMenuControl().setting;
+			menuItemIds = Array.prototype.slice.call( menuSetting() );
+			previousMenuItemId = menuItemIds[i - 1];
+			previousMenuItem = api.Menus.getMenuItemControl( previousMenuItemId );
+			previousItemDepth = previousMenuItem.params.depth;
+			
+			
+			// Can we move this item in this direction?
+			if ( 1 === offset && previousItemDepth < depth ) {
+				// Already a sub-item of previous item.
+				return;
+			} else if ( -1 === offset && 0 === depth ) {
+				// Already at the top level.
+				return;
+			}
+
+			// Get new menu item parent id.
+			if ( 1 === offset ) {
+				// Parent will be previous item if they have the same depth.
+				if ( previousItemDepth === depth ) {
+					parentId = previousMenuItemId;
+				} else {
+					// Find closest previous item of the same current depth.
+					ii = 1;
+					while ( ii <= i ) {
+						parentControl = api.Menus.getMenuItemControl( menuItemIds[i - ii] );
+						if ( depth === parentControl.params.depth ) {
+							parentId = menuItemIds[i - ii];
+							break;
+						} else {
+							ii++;
+						}
+					}
+				}
+			} else {
+				if ( 1 === depth ) {
+					parentId = 0;
+				} else {
+					// Find closest previous item with depth of 2 less than the current depth.
+					ii = 1;
+					while ( ii <= i ) {
+						parentControl = api.Menus.getMenuItemControl( menuItemIds[i - ii] );
+						if ( depth - 2 === parentControl.params.depth ) {
+							parentId = menuItemIds[i - ii];
+							break;
+						} else {
+							ii++;
+						}
+					}
+				}
+			}
+			
+			// Update menu item parent field.
+			this.container.find( '.menu-item-parent-id' ).val( parentId );
+
+			// Trigger menu item update.
+			this.updateMenuItem();
+
+			// Update depth parameter;
+			this.params.depth = depth + offset;
+
+			// Update depth class for UI.
+			this.container.find( '.menu-item' ).removeClass( 'menu-item-depth-' + depth )
+			                                   .addClass( 'menu-item-depth-' + ( depth + offset ) );
+
+			// @todo move children with item.
 		},
 	} );
 
@@ -1006,13 +1103,11 @@
 
 			/**
 			 * Update menu item order setting when controls are re-ordered.
-
-			 * @TODO: logic from nav-menu.js for sub-menu depths, etc.
 			 */
 			this.$sectionContent.sortable( {
 				items: '> .customize-control-menu_item',
 				handle: '.menu-item-handle',
-				axis: 'y',
+				placeholder: 'sortable-placeholder',
 				connectWith: '.accordion-section-content:has(.customize-control-menu_item)',
 				update: function() {
 					var menuItemContainerIds = self.$sectionContent.sortable( 'toArray' ), menuItemIds;
@@ -1022,7 +1117,126 @@
 					} );
 
 					self.setting( menuItemIds );
-				}
+				},
+/*
+
+			@TODO: logic from nav-menu.js for sub-menu depths, etc. Needs to be adapted to work here.
+				start: function( e, ui ) {
+					var height, width, parent, children, tempHolder;
+
+					// handle placement for rtl orientation
+					if ( api.isRTL ) { // @todo Customizer RTL.
+						ui.item[0].style.right = 'auto';
+					}
+
+					transport = ui.item.children('.menu-item-transport');
+
+					// Set depths. currentDepth must be set before children are located.
+					originalDepth = ui.item.find( '.menu-item' ).data( 'item-depth' );
+					currentDepth = originalDepth;
+
+					// Attach child elements to parent
+					// Skip the placeholder
+					parent = ( ui.item.next()[0] == ui.placeholder[0] ) ? ui.item.next() : ui.item;
+					children = parent.getItemChildMenuItems();
+					transport.append( children );
+
+					// Update the height of the placeholder to match the moving item.
+					height = transport.outerHeight();
+					// If there are children, account for distance between top of children and parent
+					height += ( height > 0 ) ? (ui.placeholder.css('margin-top').slice(0, -2) * 1) : 0;
+					height += ui.helper.outerHeight();
+					helperHeight = height;
+					height -= 2; // Subtract 2 for borders
+					ui.placeholder.height(height);
+
+					// Update the width of the placeholder to match the moving item.
+					maxChildDepth = originalDepth;
+					children.each(function(){
+						var depth = $(this).menuItemDepth();
+						maxChildDepth = (depth > maxChildDepth) ? depth : maxChildDepth;
+					});
+					width = ui.helper.find('.menu-item-handle').outerWidth(); // Get original width
+					width += api.depthToPx(maxChildDepth - originalDepth); // Account for children
+					width -= 2; // Subtract 2 for borders
+					ui.placeholder.width(width);
+
+					// Update the list of menu items.
+					tempHolder = ui.placeholder.next();
+					tempHolder.css( 'margin-top', helperHeight + 'px' ); // Set the margin to absorb the placeholder
+					ui.placeholder.detach(); // detach or jQuery UI will think the placeholder is a menu item
+					$(this).sortable( 'refresh' ); // The children aren't sortable. We should let jQ UI know.
+					ui.item.after( ui.placeholder ); // reattach the placeholder.
+					tempHolder.css('margin-top', 0); // reset the margin
+
+					// Now that the element is complete, we can update...
+					updateSharedVars(ui);
+				},
+				stop: function(e, ui) {
+					var children, subMenuTitle,
+						depthChange = currentDepth - originalDepth;
+
+					// Return child elements to the list
+					children = transport.children().insertAfter(ui.item);
+
+					// Add "sub menu" description
+					subMenuTitle = ui.item.find( '.item-title .is-submenu' );
+					if ( 0 < currentDepth )
+						subMenuTitle.show();
+					else
+						subMenuTitle.hide();
+
+					// Update depth classes
+					if ( 0 !== depthChange ) {
+						ui.item.updateDepthClass( currentDepth );
+						children.shiftDepthClass( depthChange );
+						updateMenuMaxDepth( depthChange );
+					}
+					// Register a change
+					api.registerChange();
+					// Update the item data.
+					ui.item.updateParentMenuItemDBId();
+
+					// address sortable's incorrectly-calculated top in opera
+					ui.item[0].style.top = 0;
+
+					// handle drop placement for rtl orientation
+					if ( api.isRTL ) {
+						ui.item[0].style.left = 'auto';
+						ui.item[0].style.right = 0;
+					}
+
+					api.refreshKeyboardAccessibility();
+					api.refreshAdvancedAccessibility();
+				},
+				change: function(e, ui) {
+					// Make sure the placeholder is inside the menu.
+					// Otherwise fix it, or we're in trouble.
+					if( ! ui.placeholder.parent().hasClass('menu') )
+						(prev.length) ? prev.after( ui.placeholder ) : api.menuList.prepend( ui.placeholder );
+
+					updateSharedVars(ui);
+				},
+				sort: function(e, ui) {
+					var offset = ui.helper.offset(),
+						edge = api.isRTL ? offset.left + ui.helper.width() : offset.left,
+						depth = api.negateIfRTL * api.pxToDepth( edge - menuEdge );
+					// Check and correct if depth is not within range.
+					// Also, if the dragged element is dragged upwards over
+					// an item, shift the placeholder to a child position.
+					if ( depth > maxDepth || offset.top < prevBottom ) depth = maxDepth;
+					else if ( depth < minDepth ) depth = minDepth;
+
+					if( depth != currentDepth )
+						updateCurrentDepth(ui, depth);
+
+					// If we overlap the next element, manually shift downwards
+					if( nextThreshold && offset.top + helperHeight > nextThreshold ) {
+						next.after( ui.placeholder );
+						updateSharedVars( ui );
+						$( this ).sortable( 'refreshPositions' );
+					}
+				}*/
 			} );
 
 			/**
