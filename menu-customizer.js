@@ -26,6 +26,7 @@
 		original_id: 0,
 		menu_id: 0,
 		depth: 0,
+		menu_item_parent_id: 0,
 		type: 'menu_item',
 	});
 
@@ -710,17 +711,27 @@
 					// Update item control accordingly with new id.
 					// Note that the id is only updated where necessary - the original id
 					// is still maintained for the setting and in the UI.
-					self.params.menu_item_id = parseInt( id, 10 );
+					id = parseInt( id, 10 );
+					self.params.menu_item_id = id;
 					self.id = 'nav_menus[' + self.params.menu_id + '][' + id + ']';
 
-					//Replace original id of this item with cloned id in the menu setting.
+					// Replace original id of this item with cloned id in the menu setting.
 					menuControl = api.Menus.getMenuControl( self.params.menu_id );
 
 					menuItemIds = menuControl.setting().slice();
 					i = _.indexOf( menuItemIds, self.params.original_id );
 
-					menuItemIds[i] = parseInt( id, 10 );
+					menuItemIds[i] = id;
 					menuControl.setting( menuItemIds );
+
+					// Update parent id for direct children items.
+					api.control.each( function( control ) {
+						if ( control.params.type === 'menu_item' && self.params.original_id === parseInt( control.params.menu_item_parent_id, 10 ) ) {
+							control.params.menu_item_parent_id = id;
+							control.container.find( '.menu-item-parent-id' ).val( id );
+							control.updateMenuItem(); // @todo this requires cloning all direct children, which will in turn recursively clone all submenu items - works, but is there a better approach?
+						}
+					} );
 				} else {
 					// @todo trigger a preview refresh.
 				}
@@ -871,10 +882,11 @@
 			// Update UI.
 			var prev = $( this.container ).prev();
 			prev.before( $( this.container ) );
-			// Update parent if it's a sub-item.
+			// Maybe update parent & depth if it's a sub-item.
 			if ( 0 != this.params.depth ) {
-				// @todo this.updateParent();
+				// @todo 
 			}
+			// @todo also move children
 			this.getMenuControl()._applyCardinalOrderClassNames();
 		},
 
@@ -887,10 +899,11 @@
 			// Update UI.
 			var next = $( this.container ).next();
 			next.after( $( this.container ) );
-			// Maybe update parent if it's a sub-item.
+			// Maybe update parent & depth if it's a sub-item.
 			if ( 0 != this.params.depth ) {
-				// @todo this.updateParent();
+				// @todo 
 			}
+			// @todo also move children
 			this.getMenuControl()._applyCardinalOrderClassNames();
 		},
 		/**
@@ -1009,7 +1022,33 @@
 			this.container.find( '.menu-item' ).removeClass( 'menu-item-depth-' + depth )
 			                                   .addClass( 'menu-item-depth-' + ( depth + offset ) );
 
-			// @todo move children with item.
+			// Does this item have any children?
+			if ( i + 1 === menuItemIds.length ){
+				// Last item.
+				return;
+			}
+			nextMenuItemId = menuItemIds[i + 1];
+			nextMenuItem = api.Menus.getMenuItemControl( nextMenuItemId );
+			nextItemDepth = nextMenuItem.params.depth;
+			if ( depth < nextItemDepth ) {
+				ii = 1;
+				while ( ii + i < menuItemIds.length ) {
+					childControl = api.Menus.getMenuItemControl( menuItemIds[i + ii] );
+					childDepth = childControl.params.depth;
+					if ( depth === childDepth ) {
+						// No longer at a child control.
+						break;
+					} else {
+						// Update depth parameter;
+						childControl.params.depth = childDepth + offset;
+
+						// Update depth class for UI.
+						childControl.container.find( '.menu-item' ).removeClass( 'menu-item-depth-' + childDepth )
+						                                           .addClass( 'menu-item-depth-' + ( childDepth + offset ) );						
+					}
+					ii++;
+				}
+			}
 		},
 	} );
 
@@ -1057,6 +1096,9 @@
 
 				// Sort menu item controls to their new positions.
 				menuItemControls.sort( function( a, b ) {
+					if ( ! a || ! b ) {
+						return;
+					}
 					var aIndex = _.indexOf( newMenuItemIds, a.params.menu_item_id ),
 						bIndex = _.indexOf( newMenuItemIds, b.params.menu_item_id );
 
@@ -1761,7 +1803,7 @@
 	 * Update Section Title as menu name is changed and item handle title when label is changed.
 	 */
 	function setupUIPreviewing() {
-		$( '#accordion-section-menus' ).on( 'input', '.live-update-section-title', function(e) {
+		$( '#accordion-panel-menus' ).on( 'input', '.live-update-section-title', function(e) {
 			var el = $( e.currentTarget ),
 				name = el.val(),
 				title = el.closest( '.accordion-section' ).find( '.accordion-section-title' );
@@ -1770,7 +1812,7 @@
 				title.html( name );
 			}
 		} );
-		$( '#accordion-section-menus' ).on( 'input', '.edit-menu-item-title', function(e) {
+		$( '#accordion-panel-menus' ).on( 'input', '.edit-menu-item-title', function(e) {
 			var input = $( e.currentTarget ), title, titleEl;
 			title = input.val();
 			titleEl = input.closest( '.menu-item' ).find( '.menu-item-title' );
