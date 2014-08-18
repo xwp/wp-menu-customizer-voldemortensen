@@ -73,15 +73,11 @@ function menu_customizer_customize_register( $wp_customize ) {
 	require_once( plugin_dir_path( __FILE__ ) . '/menu-customize-controls.php' );
 
 	// Create a panel for Menus.
-	// @see https://core.trac.wordpress.org/ticket/27406
-	// @requires WordPress 4.0-alpha-r28861 or newer.
-	if ( method_exists( 'WP_Customize_Manager', 'add_panel' ) ) {
-		$wp_customize->add_panel( 'menus', array(
-			'title'       => __( 'Menus' ),
-			'description' => __( '<p>This screen is used for managing your custom navigation menus. You can add pages, posts, categories, tags, and custom links to your menus.</p><p>Menus can be displayed in locations defined by your theme, and also used in sidebars by adding a "Custom Menu" widget on the Widgets screen.</p>' ),
-			'priority'    => 30,
-		) );
-	}
+	$wp_customize->add_panel( 'menus', array(
+		'title'       => __( 'Menus' ),
+		'description' => __( '<p>This screen is used for managing your custom navigation menus. You can add pages, posts, categories, tags, and custom links to your menus.</p><p>Menus can be displayed in locations defined by your theme, and also used in sidebars by adding a "Custom Menu" widget on the Widgets screen.</p>' ),
+		'priority'    => 30,
+	) );
 
 	// Rebrand the existing "Navigation" section to the global theme locations section.
 	$locations      = get_registered_nav_menus();
