@@ -1,6 +1,6 @@
 <?php
 /**
- * Customizer Controls for the Menu Customizer.
+ * Custom Customizer Controls for the Menu Customizer.
  */
 
 /**
@@ -46,29 +46,7 @@ class WP_Menu_Customize_Control extends WP_Customize_Control {
 		<span class="menu-delete" id="delete-menu-<?php echo $id; ?>" tabindex="0">
 			<span class="screen-reader-text"><?php printf( __( "Delete menu: %s" ), wp_get_nav_menu_object( $id )->name ); ?> </span>
 		</span>
-		<ul class="menu-settings">
-			<?php // We may need to bring this back, depending on the outcome of user testing. Hide it for now in favor of the locations section. (The idea is that having all menus visible/editable at once makes the locations selectors more intuitive and the checkboxes confusing)
-				if ( current_theme_supports( 'menus' ) && ! current_theme_supports( 'menus' ) ) : ?>
-
-				<li class="customize-control">
-					<span class="customize-control-title"><?php _e( 'Theme locations' ); ?></span>
-				</li>
-				<?php $locations = get_registered_nav_menus();
-				$menu_locations = get_nav_menu_locations(); ?>
-				<?php foreach ( $locations as $location => $description ) : ?>
-
-					<li class="customize-control customize-control-checkbox">
-						<input type="checkbox"<?php checked( isset( $menu_locations[ $location ] ) && $menu_locations[ $location ] == $id ); ?> name="menu-locations-<?php echo $id; ?>[<?php echo esc_attr( $location ); ?>]" id="menu-locations-<?php echo $id; ?>-<?php echo esc_attr( $location ); ?>" value="<?php echo esc_attr( $id ); ?>" /> <label for="menu-locations-<?php echo $id; ?>-<?php echo esc_attr( $location ); ?>"><?php echo $description; ?></label>
-						<?php if ( ! empty( $menu_locations[ $location ] ) && $menu_locations[ $location ] != $id ) : ?>
-							<span class="theme-location-set"> <?php printf( __( "(Currently set to: %s)" ), wp_get_nav_menu_object( $menu_locations[ $location ] )->name ); ?> </span>
-						<?php endif; ?>
-					</li>
-
-				<?php endforeach; ?>
-
-			<?php endif; ?>
-		</ul>
-<?php
+	<?php
 	}
 }
 
