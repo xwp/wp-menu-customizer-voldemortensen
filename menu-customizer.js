@@ -532,8 +532,7 @@
 		 * Set up the menu-item-reorder-nav
 		 */
 		_setupReorderUI: function() {
-			var self = this, selectMenu, template,
-				$reorderNav, updateAvailableMenus;
+			var self = this, template, $reorderNav;
 
 			template = wp.template( 'menu-item-reorder-nav' );
 
@@ -568,7 +567,7 @@
 					self.moveDown();
 				} else if ( isMoveLeft ) {
 					self.moveLeft();
-				} else {
+				} else if ( isMoveRight ) {
 					self.moveRight();
 				}
 
@@ -580,8 +579,7 @@
 		 * Set up event handlers for menu item updating.
 		 */
 		_setupUpdateUI: function() {
-			var self = this, $menuItemRoot, $menuItemContent,
-				updateMenuItemDebounced, formSyncHandler;
+			var self = this, $menuItemRoot, $menuItemContent;
 
 			$menuItemRoot = this.container.find( '.menu-item:first' );
 			$menuItemContent = $menuItemRoot.find( '.menu-item-settings:first' );
@@ -707,7 +705,7 @@
 			};
 
 			$.post( ajaxurl, params, function( id ) {
-				var setting, menuControl, menuItemIds, i;
+				var menuControl, menuItemIds, i;
 				if ( id && clone ) {
 					// Update item control accordingly with new id.
 					// Note that the id is only updated where necessary - the original id
@@ -885,7 +883,7 @@
 			prev.before( $( this.container ) );
 			// Maybe update parent & depth if it's a sub-item.
 			if ( 0 !== this.params.depth ) {
-				// @todo 
+				// @todo
 			}
 			// @todo also move children
 			this.getMenuControl()._applyCardinalOrderClassNames();
@@ -902,7 +900,7 @@
 			next.after( $( this.container ) );
 			// Maybe update parent & depth if it's a sub-item.
 			if ( 0 !== this.params.depth ) {
-				// @todo 
+				// @todo
 			}
 			// @todo also move children
 			this.getMenuControl()._applyCardinalOrderClassNames();
@@ -948,11 +946,13 @@
 		 * @param {Number} offset 1|-1
 		 */
 		_moveMenuItemDepthByOne: function( offset ) {
-			var depth, i, ii, parentId, parentControl, menuSetting, menuItemIds, previousMenuItemId, previousMenuItem;
+			var depth, i, ii, parentId, parentControl, menuSetting, menuItemIds,
+			    previousMenuItemId, previousMenuItem, previousItemDepth,
+			    nextMenuItemId, nextMenuItem, nextItemDepth, childControl, childDepth;
 
 			depth = this.getMenuItemDepth();
 			i = this.getMenuItemPosition();
-			
+
 			if ( 0 === i ) {
 				// First item can never be moved into or out of a sub-menu.
 				return;
@@ -963,8 +963,7 @@
 			previousMenuItemId = menuItemIds[i - 1];
 			previousMenuItem = api.Menus.getMenuItemControl( previousMenuItemId );
 			previousItemDepth = previousMenuItem.params.depth;
-			
-			
+
 			// Can we move this item in this direction?
 			if ( 1 === offset && previousItemDepth < depth ) {
 				// Already a sub-item of previous item.
@@ -1009,7 +1008,7 @@
 					}
 				}
 			}
-			
+
 			// Update menu item parent field.
 			this.container.find( '.menu-item-parent-id' ).val( parentId );
 
@@ -1045,7 +1044,7 @@
 
 						// Update depth class for UI.
 						childControl.container.find( '.menu-item' ).removeClass( 'menu-item-depth-' + childDepth )
-						                                           .addClass( 'menu-item-depth-' + ( childDepth + offset ) );						
+						                                           .addClass( 'menu-item-depth-' + ( childDepth + offset ) );
 					}
 					ii++;
 				}
@@ -1081,8 +1080,7 @@
 		 * Update ordering of menu item controls when the setting is updated.
 		 */
 		_setupModel: function() {
-			var self = this,
-				menu = api.Menus.allMenus.get( this.params.menu_id );
+			var self = this;
 
 			this.setting.bind( function( newMenuItemIds, oldMenuItemIds ) {
 				var menuItemControls, $menuAddControl, finalControlContainers, removedMenuItemIds;
@@ -1123,9 +1121,7 @@
 
 				// Cleanup after menu item removal.
 				_( removedMenuItemIds ).each( function( removedMenuItemId ) {
-					var removedControl, removedId;
-
-					removedControl = api.Menus.getMenuItemControl( removedMenuItemId );
+					var removedControl = api.Menus.getMenuItemControl( removedMenuItemId );
 
 					// Delete any menu item controls for removed items.
 					if ( removedControl ) {
@@ -1398,10 +1394,7 @@
 		 * @returns {object|false} menu_item control instance, or false on error
 		 */
 		addItemToMenu: function( item, callback ) {
-			var self = this,
-				params,
-				placeholderContainer,
-				processing,
+			var self = this, placeholderTemplate, params, placeholderContainer, processing,
 				menuId = self.params.menu_id,
 				menuControl = $( '#customize-control-nav_menu_' + menuId );
 
@@ -1643,9 +1636,7 @@
 
 		// Toggles menu-deletion mode for all menus.
 		toggleDelete: function() {
-			var container = $( '#accordion-section-menus' ),
-				sections = container.find( '.accordion-section-title' ),
-				buttons = container.find( 'menu-delete');
+			var container = $( '#accordion-panel-menus' );
 
 			container.toggleClass( 'deleting-menus' );
 
@@ -1654,7 +1645,8 @@
 
 		// Deletes a menu (pending user confirmation).
 		submitDelete: function( el ) {
-			var menu_id = $( el) .attr( 'id' ),
+			var params,
+				menu_id = $( el) .attr( 'id' ),
 				section = $( el ).closest( '.accordion-section' ),
 				next = section.next().find( '.accordion-section-title' );
 			menu_id = menu_id.replace( 'delete-menu-', '' );
