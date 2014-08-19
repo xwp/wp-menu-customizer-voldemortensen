@@ -144,7 +144,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 			) );
 
 			// Create a control for each menu item.
-			$wp_customize->add_control( new WP_Menu_Item_Customize_Control( $wp_customize, $menu_item_setting_id, array( 
+			$wp_customize->add_control( new WP_Menu_Item_Customize_Control( $wp_customize, $menu_item_setting_id, array(
 				'label'       => $item->title,
 				'section'     => $section_id,
 				'priority'    => 10 + $i,
@@ -221,20 +221,16 @@ function menu_customizer_customize_register( $wp_customize ) {
 		'section' => 'add_menu',
 	) ) );
 }
-add_action( 'customize_register', 'menu_customizer_customize_register', 11 ); // Needs to run after core Navigation section is setup.
+add_action( 'customize_register', 'menu_customizer_customize_register', 11 ); // Needs to run after core Navigation section is set up.
 
 /**
  * Save the Menu Name when it's changed.
  *
- * Menu Name is not previewable because it's designed primarily for admin uses.
- *
- * Uses `customize_update_$setting->type` hook with 2nd parameter.
- * @see https://core.trac.wordpress.org/ticket/27979
- * @requires https://core.trac.wordpress.org/attachment/ticket/27979/27979.2.patch
+ * Menu Name is not previewed because it's designed primarily for admin uses.
  *
  * @since Menu Customizer 0.0
  *
- * @param mixed $value Value of the setting.
+ * @param mixed                $value   Value of the setting.
  * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
  */
 function menu_customizer_update_menu_name( $value, $setting ) {
@@ -258,15 +254,11 @@ add_action( 'customize_update_menu_name', 'menu_customizer_update_menu_name', 10
 /**
  * Update the `auto_add` nav menus option.
  *
- * Auto-add is not previewable because it is administration-specific.
- *
- * Uses `customize_update_$setting->type` hook with 2nd parameter.
- * @see https://core.trac.wordpress.org/ticket/27979
- * @requires https://core.trac.wordpress.org/attachment/ticket/27979/27979.2.patch
+ * Auto-add is not previewed because it is administration-specific.
  *
  * @since Menu Customizer 0.0
  *
- * @param mixed $value Value of the setting.
+ * @param mixed                $value   Value of the setting.
  * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
  */
 function menu_customizer_update_menu_autoadd( $value, $setting ) {
@@ -282,7 +274,7 @@ function menu_customizer_update_menu_autoadd( $value, $setting ) {
 		return;
 	}
 
-	$nav_menu_option = (array) get_option( 'nav_menu_options' );	
+	$nav_menu_option = (array) get_option( 'nav_menu_options' );
 	if ( ! isset( $nav_menu_option['auto_add'] ) ) {
 		$nav_menu_option['auto_add'] = array();
 	}
@@ -290,14 +282,86 @@ function menu_customizer_update_menu_autoadd( $value, $setting ) {
 		if ( ! in_array( $id, $nav_menu_option['auto_add'] ) )
 			$nav_menu_option['auto_add'][] = $id;
 	} else {
-		if ( false !== ( $key = array_search( $id, $nav_menu_option['auto_add'] ) ) )
+		if ( false !== ( $key = array_search( $id, $nav_menu_option['auto_add'] ) ) ) {
 			unset( $nav_menu_option['auto_add'][$key] );
+		}
 	}
-	// Remove nonexistent/deleted menus
+
+	// Remove nonexistent/deleted menus.
 	$nav_menu_option['auto_add'] = array_intersect( $nav_menu_option['auto_add'], wp_get_nav_menus( array( 'fields' => 'ids' ) ) );
-	update_option( 'nav_menu_options', $nav_menu_option );	
+	update_option( 'nav_menu_options', $nav_menu_option );
 }
 add_action( 'customize_update_menu_autoadd', 'menu_customizer_update_menu_autoadd', 10, 2 );
+
+/**
+ * Preview changes made to a nav menu.
+ *
+ * Filters nav menu display to show customized items in the customized order.
+ *
+ * @since Menu Customizer 0.0
+ *
+ * @param array                $value   Array of the menu items to preview, in order.
+ * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
+ */
+function menu_customizer_preview_nav_menu( $setting ) {
+
+	$menu_id = str_replace( 'nav_menu_', '', $setting->id );
+
+	// Ensure that $menu_id is valid.
+	$menu_id = (int) $menu_id;
+	$menu = wp_get_nav_menu_object( $menu_id );
+	if ( ! $menu || ! $menu_id ) {
+		return new WP_Error( 'invalid_menu_id', __( 'Invalid menu ID.' ) );
+	}
+	if ( is_wp_error( $menu ) ) {
+		return $menu;
+	}
+
+	$menu_id = $menu->term_id;
+
+	// @todo don't use a closure for PHP 5.2
+	add_filter( 'wp_get_nav_menu_items', function( $items, $menu, $args ) use ( $menu_id, $setting ) {
+		$preview_menu_id = $menu->term_id;
+		if ( $menu_id == $preview_menu_id ) {
+			$new_ids = $setting->post_value();
+			$new_items = array();
+			$i = 0;
+
+			// For each item, get object and update menu order property.
+			foreach ( $new_ids as $item_id ) {
+				$item = get_post( $item_id );
+				$item = wp_setup_nav_menu_item( $item );
+				$item->menu_order = $i;
+				$new_items[] = $item;
+				$i++;
+			}
+
+			return $new_items;
+		} else {
+			return $items;
+		}
+	}, 10, 3 );
+}
+
+/**
+ * Adds hooks for previewing each menu.
+ *
+ * Necessary because of a poorly thought-out hook in core.
+ *
+ * @link https://core.trac.wordpress.org/ticket/29165
+ * Function can be replaced with //	add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 1 );
+ */
+function menu_customizer_setup_menu_previewing() {
+	$menus = wp_get_nav_menus();
+
+	foreach ( $menus as $menu ) {
+		$menu_id = $menu->term_id;
+
+		$setting_id = 'nav_menu_' . $menu_id;
+		add_action( 'customize_preview_' . $setting_id, 'menu_customizer_preview_nav_menu', 10, 1 );
+	}
+}
+add_action( 'customize_register', 'menu_customizer_setup_menu_previewing' );
 
 /**
  * Save changes made to a nav menu.
@@ -307,7 +371,7 @@ add_action( 'customize_update_menu_autoadd', 'menu_customizer_update_menu_autoad
  *
  * @since Menu Customizer 0.0
  *
- * @param array $value Array of the new menu items, in order.
+ * @param array                $value   Ordered array of the new menu item ids.
  * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
  */
 function menu_customizer_update_nav_menu( $value, $setting ) {
@@ -325,7 +389,7 @@ function menu_customizer_update_nav_menu( $value, $setting ) {
 
 	// Get original items in this menu. Any that aren't there anymore need to be deleted.
 	$originals = wp_get_nav_menu_items( $menu_id );
-	// Convert to just an array of ids
+	// Convert to just an array of ids.
 	$original_ids = array();
 	foreach ( $originals as $item ) {
 		$original_ids[] = $item->ID;
@@ -358,92 +422,24 @@ function menu_customizer_update_nav_menu( $value, $setting ) {
 add_action( 'customize_update_nav_menu', 'menu_customizer_update_nav_menu', 10, 2 );
 
 /**
- * Preview changes made to a nav menu.
- *
- * Filters nav menu display to show customized items in the customized order.
- *
- * @since Menu Customizer 0.0
- *
- * @param array $value Array of the menu items to preview, in order.
- * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
- */
-function menu_customizer_preview_nav_menu( $setting ) {
-
-	$menu_id = str_replace( 'nav_menu_', '', $setting->id );
-
-	// Ensure that $menu_id is valid.
-	$menu_id = (int) $menu_id;
-	$menu = wp_get_nav_menu_object( $menu_id );
-	if ( ! $menu || ! $menu_id ) {
-		return new WP_Error( 'invalid_menu_id', __( 'Invalid menu ID.' ) );
-	}
-	if ( is_wp_error( $menu ) ) {
-		return $menu;
-	}
-
-	$menu_id = $menu->term_id;
-
-	// @todo don't use a closure for PHP 5.2
-	add_filter( 'wp_get_nav_menu_items', function( $items, $menu, $args ) use ( $menu_id, $setting ) {
-		$preview_menu_id = $menu->term_id;
-		if ( $menu_id == $preview_menu_id ) {
-			$new_ids = $setting->post_value();
-			$new_items = array();
-			$i = 0;
-			// For each item, get object and update menu order property.
-			foreach ( $new_ids as $item_id ) {
-				$item = get_post( $item_id );
-				$item = wp_setup_nav_menu_item( $item );
-				$item->menu_order = $i;
-				$new_items[] = $item;
-				$i++;
-			}
-			return $new_items;
-		} else {
-			return $items;
-		}
-	}, 10, 3 );
-}
-
-/**
- * Adds hooks for previewing each menu.
- *
- * Necessary because of a poorly thought-out hook in core.
- */
-function menu_customizer_setup_menu_previewing() {
-//	@todo Core: the hook should *really* be customize_preview_$setting->type, not $setting->id.
-//	add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 1 );
-
-	$menus = wp_get_nav_menus();
-
-	foreach ( $menus as $menu ) {
-		$menu_id = $menu->term_id;
-
-		$setting_id = 'nav_menu_' . $menu_id;
-		add_action( 'customize_preview_' . $setting_id, 'menu_customizer_preview_nav_menu', 10, 1 );
-	}
-}
-add_action( 'customize_register', 'menu_customizer_setup_menu_previewing' );
-
-/**
  * Updates the order for and publishes an existing menu item.
  *
- * Skips the mess that is wp_update_nav_menu_item() and avoids getting 
- * and messing with menu item fields that are not changed.
+ * Skips the mess that is wp_update_nav_menu_item() and avoids
+ * handling menu item fields that are not changed.
  *
  * Based on the parts of wp_update_nav_menu_item() that are needed here.
  * $menu_id must already be validated before running this function (to avoid re-validating for each item in the menu).
  *
- * @param int $menu_id The ID of the menu. Required.
+ * @param int $menu_id The valid ID of the menu.
  * @param int $item_id The ID of the (existing) menu item.
- * @param int $order The menu item's order/position.
+ * @param int $order   The menu item's new order/position.
  * @return int|WP_Error The menu item's database ID or WP_Error object on failure.
  */
 function menu_customizer_update_menu_item_order( $menu_id, $item_id, $order ) {
 	$item_id = (int) $item_id;
 
 	// Make sure that we don't convert non-nav_menu_item objects into nav_menu_item objects.
-	if ( ! empty( $item_id ) && ! is_nav_menu_item( $item_id ) ) {
+	if ( ! is_nav_menu_item( $item_id ) ) {
 		return new WP_Error( 'update_nav_menu_item_failed', __( 'The given object ID is not that of a menu item.' ) );
 	}
 
@@ -453,7 +449,7 @@ function menu_customizer_update_menu_item_order( $menu_id, $item_id, $order ) {
 		wp_set_object_terms( $item_id, array( $menu_id ), 'nav_menu' );
 	}
 
-	// Populate the menu item object
+	// Populate the potentially-changing fields of the menu item object.
 	$post = array(
 		'ID'          => $item_id,
 		'menu_order'  => $order,
@@ -470,14 +466,15 @@ function menu_customizer_update_menu_item_order( $menu_id, $item_id, $order ) {
  * Update properties of a nav menu item, with the option to create a clone of the item.
  *
  * Wrapper for wp_update_nav_menu_item() that only requires passing changed properties.
+ *
  * @link https://core.trac.wordpress.org/ticket/28138
  *
  * @since Menu Customizer 0.0
  *
- * @param int $menu_id The ID of the menu. Required. If "0", makes the menu item a draft orphan.
- * @param int $item_id The ID of the menu item. If "0", creates a new menu item.
- * @param array $data The menu item's data to change.
- * @param bool $clone If true, creates a copy of the item and only changes the copy.
+ * @param int   $menu_id The ID of the menu. If "0", makes the menu item a draft orphan.
+ * @param int   $item_id The ID of the menu item. If "0", creates a new menu item.
+ * @param array $data    The new data for the menu item.
+ * @param bool  $clone   If true, creates a copy of the item and only changes the copy.
  * @return int|WP_Error The menu item's database ID or WP_Error object on failure.
  */
 function menu_customizer_update_menu_item( $menu_id, $item_id, $data, $clone = false ) {
@@ -511,7 +508,8 @@ function menu_customizer_update_menu_item( $menu_id, $item_id, $data, $clone = f
 
 /**
  * Return all potential menu items.
- * @todo: doing this like this is probably a horrible idea. Some sort of batching is probably needed.
+ *
+ * @todo: pagination and lazy-load, rather than loading everything at once.
  *
  * @since Menu Customizer 0.0
  *
@@ -654,7 +652,7 @@ function menu_customizer_print_templates() {
 				__( 'Move one level up' ),
 				__( 'Move one level down' )
 			); ?>
-		</div>			
+		</div>
 	</script>
 <?php
 }
@@ -702,8 +700,10 @@ function menu_customizer_available_items_template() {
 		</div>
 		<?php
 
-		// @todo: use add_meta_box/do_accordion_section and make screen-optional?
+		// @todo: consider using add_meta_box/do_accordion_section and making screen-optional?
+
 		// Containers for per-post-type item browsing; items added with JS.
+		// @todo render these (and their contents) with JS, rather than here.
 		$post_types = get_post_types( array( 'show_in_nav_menus' => true ), 'object' );
 		if ( $post_types ) {
 			foreach ( $post_types as $type ) {
@@ -738,13 +738,12 @@ add_action( 'customize_controls_print_footer_scripts', 'menu_customizer_availabl
 /**
  * Render a single menu item control.
  *
- * @param Object $item The nav menu item to render.
- * @param int $menu_id The item's menu id.
- * @param int $depth The depth of the menu item.
+ * @param Object $item    The nav menu item to render.
+ * @param int    $menu_id The item's menu id.
+ * @param int    $depth   The depth of the menu item.
  */
 function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
 	$item_id = $item->ID;
-	$setting_id = 'nav_menus[' . $menu_id . '][' . $item_id .']';
 
 	$original_title = '';
 	if ( 'taxonomy' == $item->type ) {
@@ -785,7 +784,7 @@ function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
 					<span class="is-submenu"><?php _e( 'sub item' ); ?></span>
 				</span>
 				<span class="item-controls">
-					<a class="item-edit" id="edit-<?php echo $item_id; ?>" title="<?php esc_attr_e('Edit Menu Item'); ?>" href="#"><?php _e( 'Edit Menu Item' ); ?></a>
+					<a class="item-edit" id="edit-<?php echo $item_id; ?>" title="<?php esc_attr_e( 'Edit Menu Item' ); ?>" href="#"><?php _e( 'Edit Menu Item' ); ?></a>
 				</span>
 			</dt>
 		</dl>
@@ -795,7 +794,7 @@ function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
 				<p class="field-url description description-thin">
 					<label for="edit-menu-item-url-<?php echo $item_id; ?>">
 						<?php _e( 'URL' ); ?><br />
-						<input class="widefat code edit-menu-item-url" type="text" value="<?php echo esc_attr( $item->url ); ?>" id="edit-menu-item-url-<?php echo $item_id; ?>" name="<?php echo $setting_id; ?>[url]"  />
+						<input class="widefat code edit-menu-item-url" type="text" value="<?php echo esc_attr( $item->url ); ?>" id="edit-menu-item-url-<?php echo $item_id; ?>" name="menu-item-url"  />
 					</label>
 				</p>
 			<?php endif; ?>
@@ -833,14 +832,14 @@ function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
 				<label for="edit-menu-item-description-<?php echo $item_id; ?>">
 					<?php _e( 'Description' ); ?><br />
 					<textarea id="edit-menu-item-description-<?php echo $item_id; ?>" class="widefat edit-menu-item-description" rows="3" cols="20" name="menu-item-description"><?php echo esc_html( $item->description ); // textarea_escaped ?></textarea>
-					<span class="description"><?php _e('The description will be displayed in the menu if the current theme supports it.'); ?></span>
+					<span class="description"><?php _e( 'The description will be displayed in the menu if the current theme supports it.' ); ?></span>
 				</label>
 			</p>
 
 			<div class="menu-item-actions description-thin submitbox">
 				<?php if( 'custom' != $item->type && $original_title !== false ) : ?>
 					<p class="link-to-original">
-						<?php printf( __('Original: %s'), '<a href="' . esc_attr( $item->url ) . '" target="_blank">' . esc_html( $original_title ) . '</a>' ); ?>
+						<?php printf( __( 'Original: %s' ), '<a href="' . esc_attr( $item->url ) . '" target="_blank">' . esc_html( $original_title ) . '</a>' ); ?>
 					</p>
 				<?php endif; ?>
 				<a class="item-delete submitdelete deletion" id="delete-menu-item-<?php echo $item_id; ?>" href="#"><?php _e( 'Remove' ); ?></a>
@@ -856,6 +855,7 @@ function menu_customizer_render_item_control( $item, $menu_id, $depth ) {
  * Render a new menu section and all of its default controls.
  *
  * Required for adding new menus becuase there isn't a JS API for this in the Customizer (yet).
+ *
  * @link https://core.trac.wordpress.org/ticket/28709
  *
  * @param int $menu_id The menu's id.
@@ -883,7 +883,7 @@ function menu_customizer_render_new_menu( $menu_id, $menu_name ) {
 				<label>
 					<input type="checkbox" value="" data-customize-setting-link="nav_menus[<?php echo $menu_id; ?>][auto_add]"><?php _e( 'Automatically add new top-level pages to this menu.' ); ?>
 				</label>
-			</li>			
+			</li>
 		</ul>
 	</li>
 	<?php
