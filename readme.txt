@@ -1,21 +1,21 @@
 === Menu Customizer ===
-Contributors: celloexpressions
+Contributors: celloexpressions, wordpressdotorg
 Tags: menus, custom menus, customizer, theme customizer, gsoc
-Requires at least: 4.0-beta1
+Requires at least: 4.0
 Tested up to: 4.0
-Stable tag: 0.0.6
-Description: Manage and live-preview your Custom Menus with the Customizer. GSoC Project in ALPHA development.
+Stable tag: 0.1
+Description: Manage your Menus in the Customizer. GSoC Project & WordPress core feature-plugin.
 License: GPLv2
 
 == Description ==
-This plugin is a WordPress Google Summer of Code 2014 project. See the <a href="http://make.wordpress.org/core/tag/menu-customizer/">updates on Make WordPress Core</a> for more information.
+This plugin is a WordPress Google Summer of Code 2014 project, soon to be a WordPress core feature-plugin. See the <a href="http://make.wordpress.org/core/tag/menu-customizer/">updates on Make WordPress Core</a> for more information.
 
-The Menu Customizer adds custom menu management to the Customizer. It is not fully functional and in alpha development until further notice; please don't try to run it on a production site. The plugin requires WordPress 4.0 beta 1 or higher, as it utilizes new functionalities added in 4.0. Once the plugin hits version 0.1, it will be at the initial feature-complete stage and ready for full testing. Until then, consider it a preview of things to come, but don't expect things to be at 100% :)
+The Menu Customizer adds custom menu management to the Customizer. It is not fully functional and in alpha development until further notice; please don't try to run it on a production site. The plugin requires WordPress 4.0 and PHP 5.3 or higher. It is mostly feature-complete and ready for testing, although there are known issues around adding new menus (requires some core work) and working with submenus (try the reorder mode, not drag-and-drop for now). Adding menus items could use some work as well, and is likely to have issues on sites with a large number of posts.
 
-Menu Customizer currently requires PHP 5.3 or higher.
+If you're interested in contributing to this project, stay tuned to http://make.wordpress.org/core for updates.
 
 = Core Patches =
-Several improvements to the Customizer are also in the works as a part of this project, in the form of core patches (for example, the Panels API). See <a href="http://make.wordpress.org/core/2014/07/08/customizer-improvements-in-4-0/">Customizer Improvements in 4.0</a>, and an upcomming Customizer Roadmap for details.
+Several improvements to the Customizer are also in the works as a part of the GSoC portion of this project, in the form of core patches (for example, the Panels API). See <a href="http://make.wordpress.org/core/2014/07/08/customizer-improvements-in-4-0/">Customizer Improvements in 4.0</a>, and an upcomming Customizer Roadmap for details.
 
 == Installation ==
 1. Take the easy route and install through the WordPress plugin adder OR
@@ -24,6 +24,14 @@ Several improvements to the Customizer are also in the works as a part of this p
 1. Visit the Customizer (Appearance -> Customize) to customize your menus with live previews.
 
 == Changelog ==
+See full details here: https://plugins.trac.wordpress.org/log/menu-customizer
+
+= 0.1 =
+* Extensive code cleanup.
+* First pass at sub-menus, via the buttons in the "reorder" mode.
+* Panel tweaks to sync with changes in WordPress core.
+* End of GSoC coding period.
+
 = 0.0.6 =
 * Implement live-previewing of menus and menu items.
 * Use core templating functions in JS.
