@@ -1,9 +1,8 @@
 /**
  * CSS for the Menu Customizer.
  *
- * Many styles are re-used from the existing Menu screen; these rules make 
+ * Many styles are re-used from the existing Menu screen; these rules make
  * a few adaptations so that things fit better in the Customizer.
- *
  */
 
 #accordion-section-nav .accordion-section-title:before {
@@ -81,8 +80,10 @@
 }
 
 .wp-customizer .menu-item .item-delete:before {
-	font: normal 20px/1 dashicons;
 	content: "\f158";
+	font: normal 20px/1 dashicons;
+	-webkit-font-smoothing: antialiased;
+	-moz-osx-font-smoothing: grayscale;
 	position: relative;
 	top: 5px;
 	right: 1px;
@@ -106,8 +107,8 @@
 	-moz-osx-font-smoothing: grayscale;
 	text-decoration: none !important;
 	position: relative;
-	left: 2px;
 	top: 4px;
+	left: 2px;
 	display: inline-block;
 }
 
@@ -169,7 +170,7 @@
 	content: '\f222';
 }
 
-/* @todo: disable right if already a child of previous item */
+/* @todo: these also need a lot of logic for disabling in JS, or very clever CSS */
 .first-item .menus-move-up,
 .first-item .menus-move-right,
 .last-item .menus-move-down,
@@ -332,7 +333,7 @@
 
 #screen-options-wrap.active {
 	display: block;
-	position: absolute;	
+	position: absolute;
 	top: 69px;
 	right: 8px;
 	z-index: 12;
@@ -396,7 +397,7 @@
 .menu-item-depth-10 .menu-item-transport { margin-left: -300px; }
 .menu-item-depth-11 .menu-item-transport { margin-left: -330px; }
 
-/* 
+/*
  * Add-menu-items mode.
  */
 .wp-full-overlay-main {
