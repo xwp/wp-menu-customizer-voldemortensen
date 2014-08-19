@@ -259,9 +259,10 @@
 
 			// Render the template for each item by type.
 			$.each( api.Menus.data.itemTypes, function( index, type ) {
-				var items = self.collection.where({ type: type }),
-					items = new api.Menus.AvailableItemCollection( items ),
-					typeInner = $( '#available-menu-items-' + type + ' .accordion-section-content' );
+				var items, typeInner;
+				items = self.collection.where({ type: type });
+				items = new api.Menus.AvailableItemCollection( items );
+				typeInner = $( '#available-menu-items-' + type + ' .accordion-section-content' );
 				items.each( function( menu_item ) {
 					typeInner.append( itemTemplate( menu_item.attributes ) );
 				} );
@@ -883,7 +884,7 @@
 			var prev = $( this.container ).prev();
 			prev.before( $( this.container ) );
 			// Maybe update parent & depth if it's a sub-item.
-			if ( 0 != this.params.depth ) {
+			if ( 0 !== this.params.depth ) {
 				// @todo 
 			}
 			// @todo also move children
@@ -900,7 +901,7 @@
 			var next = $( this.container ).next();
 			next.after( $( this.container ) );
 			// Maybe update parent & depth if it's a sub-item.
-			if ( 0 != this.params.depth ) {
+			if ( 0 !== this.params.depth ) {
 				// @todo 
 			}
 			// @todo also move children
@@ -1454,7 +1455,7 @@
 				api.create( settingId, settingId, {}, settingArgs );
 
 				// Register the new control.
-				controlConstructor = api.controlConstructor['menu_item'];
+				controlConstructor = api.controlConstructor.menu_item;
 				menuItemControl = new controlConstructor( settingId, {
 					params: {
 						active: true,
@@ -1616,7 +1617,7 @@
 				api.control.add( settingIdAuto, menuAutoControl );
 
 				// Register the new menu name control.
-				controlConstructor = api.controlConstructor['nav_menu'];
+				controlConstructor = api.controlConstructor.nav_menu;
 				menuControl = new controlConstructor( settingIdControls, {
 					params: {
 						settings: {
@@ -1722,7 +1723,7 @@
 		if ( control ) {
 			control.focus();
 		}
-	},
+	};
 
 	/**
 	 * @param menu_id
@@ -1739,7 +1740,7 @@
 		}
 
 		return menuControl;
-	},
+	};
 
 	/**
 	 * Given a menu item id, find the menu control that contains it.
@@ -1789,7 +1790,7 @@
 				$('.field-' + column).hide();
 			}
 		} );
-	}
+	};
 
 	/**
 	 * @param {String} menuItemId
