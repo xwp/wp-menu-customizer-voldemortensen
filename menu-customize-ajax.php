@@ -57,7 +57,7 @@ function menu_customizer_delete_menu_ajax() {
 
 	wp_die();
 }
-add_action( 'wp_ajax_delete-menu-customizer', 'menu_customizer_delete_menu_ajax');
+add_action( 'wp_ajax_delete-menu-customizer', 'menu_customizer_delete_menu_ajax' );
 
 /**
  * Ajax handler for updating a menu item.
