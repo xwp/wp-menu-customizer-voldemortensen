@@ -342,26 +342,7 @@ function menu_customizer_preview_nav_menu( $setting ) {
 		}
 	}, 10, 3 );
 }
-
-/**
- * Adds hooks for previewing each menu.
- *
- * Necessary because of a poorly thought-out hook in core.
- *
- * @link https://core.trac.wordpress.org/ticket/29165
- * Function can be replaced with //	add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 1 );
- */
-function menu_customizer_setup_menu_previewing() {
-	$menus = wp_get_nav_menus();
-
-	foreach ( $menus as $menu ) {
-		$menu_id = $menu->term_id;
-
-		$setting_id = 'nav_menu_' . $menu_id;
-		add_action( 'customize_preview_' . $setting_id, 'menu_customizer_preview_nav_menu', 10, 1 );
-	}
-}
-add_action( 'customize_register', 'menu_customizer_setup_menu_previewing' );
+add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 1 );
 
 /**
  * Save changes made to a nav menu.
