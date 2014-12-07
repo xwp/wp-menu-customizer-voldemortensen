@@ -319,28 +319,31 @@ function menu_customizer_preview_nav_menu( $setting ) {
 
 	$menu_id = $menu->term_id;
 
-	// @todo don't use a closure for PHP 5.2
-	add_filter( 'wp_get_nav_menu_items', function( $items, $menu, $args ) use ( $menu_id, $setting ) {
-		$preview_menu_id = $menu->term_id;
-		if ( $menu_id == $preview_menu_id ) {
-			$new_ids = $setting->post_value();
-			$new_items = array();
-			$i = 0;
+	// Note that setting value is only posted if it's changed.
+	if( is_array( $setting->post_value() ) ) {
+		// @todo don't use a closure for PHP 5.2
+		add_filter( 'wp_get_nav_menu_items', function( $items, $menu, $args ) use ( $menu_id, $setting ) {
+			$preview_menu_id = $menu->term_id;
+			if ( $menu_id == $preview_menu_id ) {
+				$new_ids = $setting->post_value();
+				$new_items = array();
+				$i = 0;
 
-			// For each item, get object and update menu order property.
-			foreach ( $new_ids as $item_id ) {
-				$item = get_post( $item_id );
-				$item = wp_setup_nav_menu_item( $item );
-				$item->menu_order = $i;
-				$new_items[] = $item;
-				$i++;
+				// For each item, get object and update menu order property.
+				foreach ( $new_ids as $item_id ) {
+					$item = get_post( $item_id );
+					$item = wp_setup_nav_menu_item( $item );
+					$item->menu_order = $i;
+					$new_items[] = $item;
+					$i++;
+				}
+
+				return $new_items;
+			} else {
+				return $items;
 			}
-
-			return $new_items;
-		} else {
-			return $items;
-		}
-	}, 10, 3 );
+		}, 10, 3 );
+	}
 }
 add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 1 );
 
