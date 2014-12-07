@@ -72,6 +72,9 @@ add_action( 'customize_controls_enqueue_scripts', 'menu_customizer_enqueue' );
 function menu_customizer_customize_register( $wp_customize ) {
 	require_once( plugin_dir_path( __FILE__ ) . '/menu-customize-controls.php' );
 
+	// Register JS-rendered control types.
+	$wp_customize->register_control_type( 'WP_Customize_Nav_Menu_Control' );
+
 	// Create a panel for Menus.
 	$wp_customize->add_panel( 'menus', array(
 		'title'       => __( 'Menus' ),
@@ -144,7 +147,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 			) );
 
 			// Create a control for each menu item.
-			$wp_customize->add_control( new WP_Menu_Item_Customize_Control( $wp_customize, $menu_item_setting_id, array(
+			$wp_customize->add_control( new WP_Customize_Menu_Item_Control( $wp_customize, $menu_item_setting_id, array(
 				'label'       => $item->title,
 				'section'     => $section_id,
 				'priority'    => 10 + $i,
@@ -161,7 +164,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 			'default' => $item_ids,
 		) );
 
-		$wp_customize->add_control( new WP_Menu_Customize_Control( $wp_customize, $nav_menu_setting_id, array(
+		$wp_customize->add_control( new WP_Customize_Nav_Menu_Control( $wp_customize, $nav_menu_setting_id, array(
 			'section'  => $section_id,
 			'menu_id'  => $menu_id,
 			'priority' => 998,

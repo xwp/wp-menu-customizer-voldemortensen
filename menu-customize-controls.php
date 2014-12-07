@@ -4,9 +4,9 @@
  */
 
 /**
- * Menu Customize Control Class
+ * Customize Nav Menu Control Class
  */
-class WP_Menu_Customize_Control extends WP_Customize_Control {
+class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	public $type = 'nav_menu';
 	public $menu_id;
 
@@ -17,43 +17,43 @@ class WP_Menu_Customize_Control extends WP_Customize_Control {
 	 */
 	public function to_json() {
 		parent::to_json();
-		$exported_properties = array( 'menu_id' );
-		foreach ( $exported_properties as $key ) {
-			$this->json[ $key ] = $this->$key;
-		}
+		$this->json[ 'menu_id' ] = $this->menu_id;
+		$this->json[ 'menu_name' ] = wp_get_nav_menu_object( $this->menu_id )->name;
 	}
 
 	/**
-	 * Render the control's content.
+	 * Don't render the control's content - it uses a JS template instead.
 	 *
 	 * @since Menu Customizer 0.0
 	 */
-	public function render_content() {
-		$id = absint( $this->menu_id );
-		?>
+	public function render_content() {}
 
+	/**
+	 * Refresh the parameters passed to the JavaScript via JSON.
+	 *
+	 * @since Menu Customizer 0.2
+	 */
+	public function content_template() {
+		?>
 		<span class="button-secondary add-new-menu-item" tabindex="0">
 			<?php _e( 'Add Links' ); ?>
 		</span>
-
 		<span class="add-menu-item-loading spinner"></span>
-
 		<span class="reorder-toggle" tabindex="0">
 			<span class="reorder"><?php _ex( 'Reorder', 'Reorder menu items in Customizer' ); ?></span>
 			<span class="reorder-done"><?php _ex( 'Done', 'Cancel reordering menu items in Customizer'  ); ?></span>
 		</span>
-
-		<span class="menu-delete" id="delete-menu-<?php echo $id; ?>" tabindex="0">
-			<span class="screen-reader-text"><?php printf( __( "Delete menu: %s" ), wp_get_nav_menu_object( $id )->name ); ?> </span>
+		<span class="menu-delete" id="delete-menu-{{ data.menu_id }}" tabindex="0">
+			<span class="screen-reader-text"><?php _e( 'Delete menu:' ); ?> {{ data.menu_name }}</span>
 		</span>
 	<?php
 	}
 }
 
 /**
- * Menu Item Customize Control Class
+ * Customize Menu Item Control Class
  */
-class WP_Menu_Item_Customize_Control extends WP_Customize_Control {
+class WP_Customize_Menu_Item_Control extends WP_Customize_Control {
 	public $type = 'menu_item';
 	public $menu_id = 0;
 	public $item;
