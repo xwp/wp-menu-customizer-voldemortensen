@@ -74,6 +74,7 @@ function menu_customizer_customize_register( $wp_customize ) {
 
 	// Register JS-rendered control types.
 	$wp_customize->register_control_type( 'WP_Customize_Nav_Menu_Control' );
+	$wp_customize->register_control_type( 'WP_Customize_Menu_Item_Control' );
 
 	// Create a panel for Menus.
 	$wp_customize->add_panel( 'menus', array(
