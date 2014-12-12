@@ -1413,31 +1413,22 @@
 
 			params = {
 				'action': 'add-menu-item-customizer',
-				'menu': menuId,
 				'customize-menu-item-nonce': api.Menus.data.nonce,
-				'menu-item': item
+				'menu': menuId,
+				'menu-item': item,
+				'priority': self.setting._value.length + 10
 			};
 
-			$.post( ajaxurl, params, function( menuItemMarkup ) {
-				var dbid, settingId, settingArgs, controlConstructor, menuItemControl, menuItems;
+			$.post( ajaxurl, params, function( menuItemJson ) {
+				var dbid, settingId, settingArgs, controlConstructor, menuItemControl, menuItems,
+					menuItemParams, arr = new Array();
+ 				menuItemParams = JSON.parse( menuItemJson );
+				menuItemParams.priority = parseInt( menuItemParams.priority );
+				menuItemParams.original_id = 0; // Set to 0 to avoid cloning when updated before publish.
 
-				menuItemMarkup = $.trim( menuItemMarkup ); // Trim leading whitespaces.
-				dbid = $( menuItemMarkup ).first( '.menu-item' ).attr( 'id' );
-				if ( ! dbid ) {
-					// Something's wrong with the returned markup, bail.
-					placeholderContainer.fadeOut( 'slow', function() { $( this ).remove(); } );
-					return;
-				}
-				dbid = parseInt( dbid.replace( 'menu-item-', '' ) );
-
-				// Replace the placeholder with the control markup.
-				placeholderContainer.html( menuItemMarkup )
-									.attr( 'id', 'customize-control-nav_menus-' + menuId + '-' + dbid )
-									.removeClass( 'nav-menu-inserted-item-loading' );
-
-				// Make it stand out a bit more visually, by adding a fadeIn.
-				// @todo try replacing this with a bouncing css transition; the hide part is awkward.
-				placeholderContainer.hide().fadeIn('slow');
+				dbid = menuItemParams.menu_item_id;
+				// Remove the placeholder.
+				placeholderContainer.remove();
 
 				// Register the new setting.
 				settingId = 'nav_menus[' + menuId + '][' + dbid + ']';
@@ -1450,21 +1441,17 @@
 				// Register the new control.
 				controlConstructor = api.controlConstructor.menu_item;
 				menuItemControl = new controlConstructor( settingId, {
-					params: {
-						active: true,
-						settings: {
-							'default': settingId
-						},
-						menu_id: self.params.menu_id,
-						menu_item_id: dbid,
-						original_id: 0, // Set to 0 to avoid cloning when updated before publish.
-						type: 'menu_item',
-						depth: 0,
-						position: self.setting._value.length
-					},
+					params: menuItemParams,
+					active: true,
+					type: 'menu_item',
+					depth: 0,
+					section: 'nav_menus[' + menuId + ']',
 					previewer: self.setting.previewer
 				} );
 				api.control.add( settingId, menuItemControl );
+				api.control( settingId ).renderContent();//@todo should this be necessary?
+				api.control( settingId ).activate({ duration: 'fast', completeCallback: $.noop });//@todo this causes an error
+
 				// Make sure the panel hasn't been closed in the meantime.
 				if ( $( 'body' ).hasClass( 'adding-menu-items' ) ) {
 					// Move the delete button up to match the existing widgets.

@@ -98,6 +98,8 @@ function menu_customizer_add_item_ajax() {
 	}
 
 	require_once ABSPATH . 'wp-admin/includes/nav-menu.php';
+	require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+	$wp_customize = new WP_Customize_Manager;
 
 	$menu_item_data = (array) $_POST['menu-item'];
 	$menu_id = absint( $_POST['menu'] ); // Used only for display, new item is created as an orphan - menu id of 0.
@@ -161,10 +163,25 @@ function menu_customizer_add_item_ajax() {
 	if ( ! empty( $item->ID ) ) {
 		$item = wp_setup_nav_menu_item( $item );
 		$item->label = $item->title; // Don't show "(pending)" in ajax-added items.
-	}
 
-	// Output the markup for this item.
-	menu_customizer_render_item_control( $item, $menu_id, 0 );
+		// Output the json for this item's control.
+		require_once( plugin_dir_path( __FILE__ ) . '/menu-customize-controls.php' );
+
+		$section_id = 'nav_menus[' . $menu_id . ']';
+		$setting_id = $section_id . '[' . $item->ID . ']';
+		$wp_customize->add_setting( $setting_id, array(
+			'type' => 'option',
+			'default' => array(),
+		) );
+		$control = new WP_Customize_Menu_Item_Control( $wp_customize, $setting_id, array(
+			'label'       => $item->title,
+			'section'     => $section_id,
+			'priority'    => $_POST['priority'],
+			'menu_id'     => $menu_id,
+			'item'        => $item,
+		) );
+		echo wp_json_encode( $control->json() );//@todo convert to json
+	}
 
 	wp_die();
 }
