@@ -33,7 +33,7 @@ if ( is_admin() && defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 }
 
 /**
- * Enqueue sripts and styles.
+ * Enqueue scripts and styles.
  *
  * @since Menu Customizer 0.0
  */
@@ -135,9 +135,38 @@ function menu_customizer_customize_register( $wp_customize ) {
 		) );
 
 		// Add the menu contents.
-		$menu_items = wp_get_nav_menu_items( $menu_id );
+		$menu_items = array();
+
+		foreach ( wp_get_nav_menu_items( $menu_id ) as $menu_item ) {
+			$menu_items[ $menu_item->ID ] = $menu_item;
+		}
+
+		// @todo we need to implement something like WP_Customize_Widgets::prepreview_added_sidebars_widgets() so that wp_get_nav_menu_items() will include the new menu items
+		if ( ! empty( $_POST['customized'] ) && ( $customized = json_decode( wp_unslash( $_POST['customized'] ), true ) ) && is_array( $customized ) ) {
+			foreach ( $customized as $incoming_setting_id => $incoming_setting_value ) {
+				if ( preg_match( '/^nav_menus\[(?P<menu_id>\d+)\]\[(?P<menu_item_id>\d+)\]$/', $incoming_setting_id, $matches ) ) {
+					if ( ! isset( $menu_items[ $matches['menu_item_id'] ] ) ) {
+						$incoming_setting_value = (object) $incoming_setting_value;
+						if ( ! isset( $incoming_setting_value->ID ) ) {
+							// @TODO: This should be supplied already
+							$incoming_setting_value->ID = $matches['menu_item_id'];
+						}
+						if ( ! isset ( $incoming_setting_value->title ) ) {
+							// @TODO: This should be supplied already
+							$incoming_setting_value->title = 'UNTITLED';
+						}
+						if ( ! isset ( $incoming_setting_value->menu_item_parent ) ) {
+							// @TODO: This should be supplied already
+							$incoming_setting_value->menu_item_parent = 0;
+						}
+						$menu_items[ $matches['menu_item_id'] ] = $incoming_setting_value;
+					}
+				}
+			}
+		}
+
 		$item_ids = array();
-		foreach( $menu_items as $i => $item ) {
+		foreach ( array_values( $menu_items ) as $i => $item ) {
 			$item_ids[] = $item->ID;
 
 			// Create a setting for each menu item (which doesn't actually manage data, currently).

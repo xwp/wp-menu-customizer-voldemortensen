@@ -1,10 +1,16 @@
-/* global _wpCustomizeMenusSettings */
+/* global _wpCustomizeMenusSettings, confirm */
 (function( wp, $ ){
+	'use strict';
 
 	if ( ! wp || ! wp.customize ) { return; }
 
 	// Set up our namespace.
-	var api = wp.customize;
+	var OldPreviewer, api = wp.customize;
+
+	// Fix bug in 4.1RC1: https://core.trac.wordpress.org/ticket/30701
+	if ( ! api.Control.prototype._toggleActive ) {
+		api.Control.prototype._toggleActive = api.Section.prototype._toggleActive;
+	}
 
 	api.Menus = api.Menus || {};
 
@@ -27,7 +33,7 @@
 		menu_id: 0,
 		depth: 0,
 		menu_item_parent_id: 0,
-		type: 'menu_item',
+		type: 'menu_item'
 	});
 
 	/**
@@ -44,7 +50,7 @@
 		type: null,
 		type_label: null,
 		obj_type: null,
-		date: null,
+		date: null
 	});
 
 	/**
@@ -128,7 +134,7 @@
 	 * @augments Backbone.Model
 	 */
 	api.Menus.MenuModel = Backbone.Model.extend({
-		id: null,
+		id: null
 	});
 
 	/**
@@ -201,7 +207,7 @@
 			// available menu items panel.
 			$( '#customize-controls' ).on( 'click keydown', function( e ) {
 				var isDeleteBtn = $( e.target ).is( '.item-delete, .item-delete *' ),
-				    isAddNewBtn = $( e.target ).is( '.add-new-menu-item, .add-new-menu-item *' );
+					isAddNewBtn = $( e.target ).is( '.add-new-menu-item, .add-new-menu-item *' );
 				if ( $( 'body' ).hasClass( 'adding-menu-items' ) && ! isDeleteBtn && ! isAddNewBtn ) {
 					self.close();
 				}
@@ -344,7 +350,7 @@
 				return;
 			}
 
-			if ( '' === item_name.val() || '' === item_url.val() || 'http://' == item_url.val() ) {
+			if ( '' === item_name.val() || '' === item_url.val() || 'http://' === item_url.val() ) {
 				return;
 			}
 
@@ -593,7 +599,7 @@
 			} );
 
 			// Regular menu item update triggering - on change.
-			$menuItemContent.on( 'change', ':input', function( e ) {
+			$menuItemContent.on( 'change', ':input', function() {
 				self.updateMenuItem();
 			} );
 
@@ -704,7 +710,7 @@
 				'customize-menu-item-nonce': api.Menus.data.nonce
 			};
 
-			$.post( ajaxurl, params, function( id ) {
+			$.post( wp.ajax.settings.url, params, function( id ) {
 				var menuControl, menuItemIds, i;
 				if ( id && clone ) {
 					// Update item control accordingly with new id.
@@ -794,8 +800,9 @@
 				} );
 
 				complete = function() {
-					$menuitem.removeClass( 'menu-item-edit-inactive' )
-							 .addClass( 'menu-item-edit-active' );
+					$menuitem
+						.removeClass( 'menu-item-edit-inactive' )
+						.addClass( 'menu-item-edit-active' );
 					self.container.trigger( 'expanded' );
 				};
 
@@ -804,8 +811,9 @@
 				self.container.trigger( 'expand' );
 			} else {
 				complete = function() {
-					$menuitem.addClass( 'menu-item-edit-inactive' )
-							 .removeClass( 'menu-item-edit-active' );
+					$menuitem
+						.addClass( 'menu-item-edit-inactive' )
+						.removeClass( 'menu-item-edit-active' );
 					self.container.trigger( 'collapsed' );
 				};
 
@@ -848,7 +856,7 @@
 		/**
 		 * Get the position (index) of the item in the containing menu.
 		 *
-		 * @returns {Number}
+		 * @returns {Number|null}
 		 */
 		getMenuItemPosition: function() {
 			var menuItemIds, position;
@@ -857,7 +865,7 @@
 			position = _.indexOf( menuItemIds, this.params.menu_item_id );
 
 			if ( position === -1 ) {
-				return;
+				return null;
 			}
 
 			return position;
@@ -947,8 +955,8 @@
 		 */
 		_moveMenuItemDepthByOne: function( offset ) {
 			var depth, i, ii, parentId, parentControl, menuSetting, menuItemIds,
-			    previousMenuItemId, previousMenuItem, previousItemDepth,
-			    nextMenuItemId, nextMenuItem, nextItemDepth, childControl, childDepth;
+				previousMenuItemId, previousMenuItem, previousItemDepth,
+				nextMenuItemId, nextMenuItem, nextItemDepth, childControl, childDepth;
 
 			depth = this.getMenuItemDepth();
 			i = this.getMenuItemPosition();
@@ -1019,8 +1027,9 @@
 			this.params.depth = depth + offset;
 
 			// Update depth class for UI.
-			this.container.find( '.menu-item' ).removeClass( 'menu-item-depth-' + depth )
-			                                   .addClass( 'menu-item-depth-' + ( depth + offset ) );
+			this.container.find( '.menu-item' )
+				.removeClass( 'menu-item-depth-' + depth )
+				.addClass( 'menu-item-depth-' + ( depth + offset ) );
 
 			// Does this item have any children?
 			if ( i + 1 === menuItemIds.length ){
@@ -1043,13 +1052,14 @@
 						childControl.params.depth = childDepth + offset;
 
 						// Update depth class for UI.
-						childControl.container.find( '.menu-item' ).removeClass( 'menu-item-depth-' + childDepth )
-						                                           .addClass( 'menu-item-depth-' + ( childDepth + offset ) );
+						childControl.container.find( '.menu-item' )
+							.removeClass( 'menu-item-depth-' + childDepth )
+							.addClass( 'menu-item-depth-' + ( childDepth + offset ) );
 					}
 					ii++;
 				}
 			}
-		},
+		}
 	} );
 
 	/**
@@ -1152,11 +1162,11 @@
 					var menuItemContainerIds = self.$sectionContent.sortable( 'toArray' ), menuItemIds;
 
 					menuItemIds = $.map( menuItemContainerIds, function( menuItemContainerId ) {
-						return parseInt( menuItemContainerId.replace( 'customize-control-nav_menus-' + self.params.menu_id + '-', '' ) );
+						return parseInt( menuItemContainerId.replace( 'customize-control-nav_menus-' + self.params.menu_id + '-', '' ), 10 );
 					} );
 
 					self.setting( menuItemIds );
-				},
+				}
 /*
 
 			@TODO: logic from nav-menu.js for sub-menu depths, etc. Needs to be adapted to work here.
@@ -1419,11 +1429,11 @@
 				'priority': self.setting._value.length + 10
 			};
 
-			$.post( ajaxurl, params, function( menuItemJson ) {
-				var dbid, settingId, settingArgs, controlConstructor, menuItemControl, menuItems,
-					menuItemParams, arr = new Array();
- 				menuItemParams = JSON.parse( menuItemJson );
-				menuItemParams.priority = parseInt( menuItemParams.priority );
+			$.post( wp.ajax.settings.url, params, function( menuItemJson ) {
+				var dbid, settingId, settingArgs, ControlConstructor, menuItemControl, menuItems,
+					menuItemParams;
+				menuItemParams = JSON.parse( menuItemJson );
+				menuItemParams.priority = parseInt( menuItemParams.priority, 10 );
 				menuItemParams.original_id = 0; // Set to 0 to avoid cloning when updated before publish.
 
 				dbid = menuItemParams.menu_item_id;
@@ -1436,11 +1446,13 @@
 					transport: 'refresh',
 					previewer: self.setting.previewer
 				};
-				api.create( settingId, settingId, {}, settingArgs );
+				api.create( settingId, settingId, '', settingArgs );
+				api( settingId ).set( {} ); // Change from '' to {} to mark as dirty
+				// @todo: Instead of {}, the initial setting should have an ID, title, and menu_item_parent
 
 				// Register the new control.
-				controlConstructor = api.controlConstructor.menu_item;
-				menuItemControl = new controlConstructor( settingId, {
+				ControlConstructor = api.controlConstructor.menu_item;
+				menuItemControl = new ControlConstructor( settingId, {
 					params: menuItemParams,
 					active: true,
 					type: 'menu_item',
@@ -1449,8 +1461,6 @@
 					previewer: self.setting.previewer
 				} );
 				api.control.add( settingId, menuItemControl );
-				api.control( settingId ).renderContent();//@todo should this be necessary?
-				api.control( settingId ).activate({ duration: 'fast', completeCallback: $.noop });//@todo this causes an error
 
 				// Make sure the panel hasn't been closed in the meantime.
 				if ( $( 'body' ).hasClass( 'adding-menu-items' ) ) {
@@ -1541,12 +1551,12 @@
 			params = {
 				'action': 'add-nav-menu-customizer',
 				'menu-name': name.val(),
-				'customize-nav-menu-nonce': api.Menus.data.nonce,
+				'customize-nav-menu-nonce': api.Menus.data.nonce
 			};
 
-			$.post( ajaxurl, params, function( menuSectionMarkup ) {
+			$.post( wp.ajax.settings.url, params, function( menuSectionMarkup ) {
 				var menu_id, sectionId, settingIdName, settingIdControls,
-					settingIdAuto, settingArgs, controlConstructor,
+					settingIdAuto, settingArgs, ControlConstructor,
 					menuControl, menuNameControl, menuAutoControl;
 
 				menuSectionMarkup = $.trim( menuSectionMarkup ); // Trim leading whitespaces.
@@ -1579,7 +1589,7 @@
 					params: {
 						settings: {
 							'default': settingIdName
-						},
+						}
 					},
 					previewer: self.setting.previewer
 				} );
@@ -1590,19 +1600,19 @@
 					params: {
 						settings: {
 							'default': settingIdAuto
-						},
+						}
 					},
 					previewer: self.setting.previewer
 				} );
 				api.control.add( settingIdAuto, menuAutoControl );
 
 				// Register the new menu name control.
-				controlConstructor = api.controlConstructor.nav_menu;
-				menuControl = new controlConstructor( settingIdControls, {
+				ControlConstructor = api.controlConstructor.nav_menu;
+				menuControl = new ControlConstructor( settingIdControls, {
 					params: {
 						settings: {
 							'default': settingIdControls
-						},
+						}
 					},
 					previewer: self.setting.previewer
 				} );
@@ -1648,7 +1658,7 @@
 						'menu_id': menu_id,
 						'customize-nav-menu-nonce': api.Menus.data.nonce
 					};
-					$.post( ajaxurl, params, function( success ) {
+					$.post( wp.ajax.settings.url, params, function() {
 						// Remove the UI, once menu has been deleted.
 						section.slideUp( 'slow', function() {
 							section.remove();
@@ -1748,7 +1758,7 @@
 		var foundControl = null;
 
 		api.control.each( function( control ) {
-			if ( control.params.type === 'menu_item' && control.params.menu_item_id == menuItemId ) {
+			if ( control.params.type === 'menu_item' && control.params.menu_item_id === menuItemId ) {
 				foundControl = control;
 			}
 		} );
@@ -1798,11 +1808,13 @@
 			titleEl = input.closest( '.menu-item' ).find( '.menu-item-title' );
 			// Don't update to empty title.
 			if ( title ) {
-				titleEl.text( title )
-				       .removeClass( 'no-title' );
+				titleEl
+					.text( title )
+					.removeClass( 'no-title' );
 			} else {
-				titleEl.text( api.Menus.data.l10n.untitled )
-				       .addClass( 'no-title' );
+				titleEl
+					.text( api.Menus.data.l10n.untitled )
+					.addClass( 'no-title' );
 			}
 		} );
 	}
