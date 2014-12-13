@@ -8,7 +8,7 @@
 		init : function() {
 			// Add a screen options button to the Menus page header.
 			var button = '<a id="customizer-menu-screen-options-button" title="Menu Options" href="#"></a>',
-				header = $( '#accordion-section-menus .accordion-sub-container ' );
+				header = $( '#accordion-panel-menus .accordion-sub-container ' );
 			header.find( '.accordion-section:first .accordion-section-title' ).append( button );
 			$( '#screen-options-wrap' ).prependTo( header );
 			$( '#customize-control-menu_customizer_options' ).remove();
