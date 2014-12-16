@@ -1464,7 +1464,7 @@
 
 				// Make sure the panel hasn't been closed in the meantime.
 				if ( $( 'body' ).hasClass( 'adding-menu-items' ) ) {
-					// Move the delete button up to match the existing widgets.
+					// Move the delete button up to match the existing items.
 					api.Menus.getMenuItemControl( dbid ).toggleDeletePosition( true );
 					api.Menus.refreshVisibleMenuOptions();
 				}
@@ -1508,8 +1508,7 @@
 			var self = this,
 				name = $( '#customize-control-new_menu_name input' ),
 				submit = $( '#create-new-menu-submit' ),
-				toggle = $( '#toggle-menu-delete' ),
-				deleteBtns = $( '.menu-delete' );
+				toggle = $( '#toggle-menu-delete' );
 			name.on( 'keydown', function( event ) {
 				if ( event.which === 13 ) { // Enter.
 					self.submit();
@@ -1521,7 +1520,10 @@
 			toggle.on( 'click', function() {
 				self.toggleDelete();
 			} );
-			deleteBtns.on( 'click', function( e ) {
+			$( '#accordion-panel-menus' ).on( 'click keydown', '.menu-delete', function( e ) {
+				if ( 'keydown' === e.type && 13 !== event.which ) { // Enter.
+					return;
+				}
 				self.submitDelete( e.target );
 				e.stopPropagation();
 				e.preventDefault();
@@ -1554,23 +1556,54 @@
 				'customize-nav-menu-nonce': api.Menus.data.nonce
 			};
 
-			$.post( wp.ajax.settings.url, params, function( menuSectionMarkup ) {
-				var menu_id, sectionId, settingIdName, settingIdControls,
-					settingIdAuto, settingArgs, ControlConstructor,
+			$.post( wp.ajax.settings.url, params, function( menuJson ) {
+				var id, priority, menuParams, sectionId, SectionConstructor, menuSection,
+					menuSettingId, settingArgs, ControlConstructor, menuControl,
+					settingIdName, settingIdControls,
+					settingIdAuto, 
 					menuControl, menuNameControl, menuAutoControl;
+				menuParams = JSON.parse( menuJson );
+				menuParams.id = parseInt( menuParams.id, 10 );
+				sectionId = 'nav_menus[' + menuParams.id + ']';
 
-				menuSectionMarkup = $.trim( menuSectionMarkup ); // Trim leading whitespaces.
-				sectionId = $( menuSectionMarkup ).first( '.accordion-section' ).attr( 'id' );
-				if ( ! sectionId ) {
-					// Something's wrong with the returned markup, bail.
-					return false;
-				}
-				menu_id = sectionId.replace( 'accordion-section-nav_menus[', '' );
-				menu_id = menu_id.replace( '[', '' );
+				// Add the menu section.
+				priority = 10;
+				SectionConstructor = api.Section;
+				menuSection = new SectionConstructor( sectionId, {
+					active: true,
+					panel: 'menus',
+					title: menuParams.name,
+					priority: priority,
+					previewer: self.setting.previewer
+				} );
+				api.section.add( sectionId, menuSection );
 
-				// Add the new menu to the DOM.
-				container.before( menuSectionMarkup );
-				$( '#' . sectionId ).hide().slideDown( 'slow' );
+				// Register the menu control setting.
+				menuSettingId = 'nav_menu_' + menuParams.id;
+				settingArgs = {
+					transport: 'refresh',
+					previewer: self.setting.previewer
+				};
+				api.create( menuSettingId, menuSettingId, '', settingArgs );
+				api( menuSettingId ).set( {} ); // Change from '' to {} to mark as dirty
+				
+				// Add the menu control.
+				ControlConstructor = api.controlConstructor.nav_menu;
+				menuControl = new ControlConstructor( menuSettingId, {
+					params: {
+						menu_id: menuParams.id,
+						settings: {
+							'default': menuSettingId
+						}
+					},
+					active: true,
+					type: 'nav_menu',
+					section: sectionId,
+					priority: 998,
+					previewer: self.setting.previewer
+				} );
+				api.control.add( menuSettingId, menuControl );
+/*
 
 				// Register the new settings.
 				settingIdName = 'nav_menus[' + menu_id + '][name]';
@@ -1579,8 +1612,6 @@
 					previewer: self.setting.previewer
 				};
 				api.create( settingIdName, settingIdName, {}, settingArgs );
-				settingIdControls = 'nav_menu_' + menu_id;
-				api.create( settingIdControls, settingIdControls, {}, settingArgs );
 				settingIdAuto = 'nav_menus[' + menu_id + '][auto_add]';
 				api.create( settingIdAuto, settingIdAuto, {}, settingArgs );
 
@@ -1605,19 +1636,7 @@
 					previewer: self.setting.previewer
 				} );
 				api.control.add( settingIdAuto, menuAutoControl );
-
-				// Register the new menu name control.
-				ControlConstructor = api.controlConstructor.nav_menu;
-				menuControl = new ControlConstructor( settingIdControls, {
-					params: {
-						settings: {
-							'default': settingIdControls
-						}
-					},
-					previewer: self.setting.previewer
-				} );
-				api.control.add( settingIdControls, menuControl );
-
+*/
 				// Remove this level of the customizer processing state.
 				processing( processing() - 1 );
 
@@ -1626,6 +1645,9 @@
 
 				// Clear name field.
 				name.val('');
+				
+				// Focus on the new menu section.
+				api.section( sectionId ).focus();
 			});
 
 			return false;

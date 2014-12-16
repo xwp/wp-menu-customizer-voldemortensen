@@ -25,8 +25,8 @@ function menu_customizer_new_menu_ajax() {
 		wp_die();
 	}
 
-	// Output the markup for this new menu.
-	menu_customizer_render_new_menu( $menu_id, $menu_name );
+	// Output the data for this new menu.
+	echo wp_json_encode( array( 'name' => $menu_name, 'id' => $menu_id ) );
 
 	wp_die();
 }
