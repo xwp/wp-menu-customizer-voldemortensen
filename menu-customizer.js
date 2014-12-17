@@ -1559,9 +1559,7 @@
 			$.post( wp.ajax.settings.url, params, function( menuJson ) {
 				var id, priority, menuParams, sectionId, SectionConstructor, menuSection,
 					menuSettingId, settingArgs, ControlConstructor, menuControl, sectionContent,
-					template, sectionParams, settingIdName, settingIdControls,
-					settingIdAuto, 
-					menuControl, menuNameControl, menuAutoControl;
+					template, sectionParams, menuControl, option;
 				menuParams = JSON.parse( menuJson );
 				menuParams.id = parseInt( menuParams.id, 10 );
 				sectionId = 'nav_menus[' + menuParams.id + ']';
@@ -1595,6 +1593,7 @@
 				// Register the menu control setting.
 				menuSettingId = 'nav_menu_' + menuParams.id;
 				settingArgs = {
+					type: 'nav_menu',
 					transport: 'refresh',
 					previewer: self.setting.previewer
 				};
@@ -1621,6 +1620,10 @@
 
 				// @todo: nemu name and auto-add new items controls
 				// requires @link https://core.trac.wordpress.org/ticket/30738 at a minimum to be reasonable
+
+				// Add the new menu as an option to each theme location control.
+				option = '<option value="' + menuParams.id + '">' + menuParams.name + '</option>';
+				$( '#accordion-section-nav .customize-control select' ).append( option );
 
 				// Remove this level of the customizer processing state.
 				processing( processing() - 1 );
