@@ -1558,25 +1558,39 @@
 
 			$.post( wp.ajax.settings.url, params, function( menuJson ) {
 				var id, priority, menuParams, sectionId, SectionConstructor, menuSection,
-					menuSettingId, settingArgs, ControlConstructor, menuControl,
-					settingIdName, settingIdControls,
+					menuSettingId, settingArgs, ControlConstructor, menuControl, sectionContent,
+					template, sectionParams, settingIdName, settingIdControls,
 					settingIdAuto, 
 					menuControl, menuNameControl, menuAutoControl;
 				menuParams = JSON.parse( menuJson );
 				menuParams.id = parseInt( menuParams.id, 10 );
 				sectionId = 'nav_menus[' + menuParams.id + ']';
+				sectionParams = {
+					id: sectionId,
+					active: true,
+					panel: 'menus',
+					title: menuParams.name,
+					priority: priority
+				};
+				// @todo this should happen by default when adding a panel or section dynamically
+				// @todo sections and panels should have content_template() like controls
+				// @link https://core.trac.wordpress.org/ticket/30737
+				if ( 0 !== $( '#tmpl-menu-section-for-core' ).length ) {
+					template = wp.template( 'menu-section-for-core' );
+					if ( template ) {
+						sectionContent = template( sectionParams );
+						sectionParams.content = sectionContent;
+					}
+				}
 
 				// Add the menu section.
 				priority = 10;
 				SectionConstructor = api.Section;
 				menuSection = new SectionConstructor( sectionId, {
-					active: true,
-					panel: 'menus',
-					title: menuParams.name,
-					priority: priority,
-					previewer: self.setting.previewer
+					params: sectionParams
 				} );
 				api.section.add( sectionId, menuSection );
+				api.section( sectionId ).activate();
 
 				// Register the menu control setting.
 				menuSettingId = 'nav_menu_' + menuParams.id;
@@ -1591,52 +1605,23 @@
 				ControlConstructor = api.controlConstructor.nav_menu;
 				menuControl = new ControlConstructor( menuSettingId, {
 					params: {
+						type: 'nav_menu',
+						content: '<li id="customize-control-nav_menu_' + menuParams.id + '" class="customize-control customize-control-nav_menu"></li>', // @todo core should do this for us
 						menu_id: menuParams.id,
+						section: sectionId,
+						priority: 998,
+						active: true,
 						settings: {
 							'default': menuSettingId
 						}
 					},
-					active: true,
-					type: 'nav_menu',
-					section: sectionId,
-					priority: 998,
 					previewer: self.setting.previewer
 				} );
 				api.control.add( menuSettingId, menuControl );
-/*
 
-				// Register the new settings.
-				settingIdName = 'nav_menus[' + menu_id + '][name]';
-				settingArgs = {
-					transport: 'refresh',
-					previewer: self.setting.previewer
-				};
-				api.create( settingIdName, settingIdName, {}, settingArgs );
-				settingIdAuto = 'nav_menus[' + menu_id + '][auto_add]';
-				api.create( settingIdAuto, settingIdAuto, {}, settingArgs );
+				// @todo: nemu name and auto-add new items controls
+				// requires @link https://core.trac.wordpress.org/ticket/30738 at a minimum to be reasonable
 
-				// Register the new menu name control.
-				menuNameControl = new api.Control( settingIdName, {
-					params: {
-						settings: {
-							'default': settingIdName
-						}
-					},
-					previewer: self.setting.previewer
-				} );
-				api.control.add( settingIdName, menuNameControl );
-
-				// Register the new menu auto-add control.
-				menuAutoControl = new api.Control( settingIdAuto, {
-					params: {
-						settings: {
-							'default': settingIdAuto
-						}
-					},
-					previewer: self.setting.previewer
-				} );
-				api.control.add( settingIdAuto, menuAutoControl );
-*/
 				// Remove this level of the customizer processing state.
 				processing( processing() - 1 );
 
