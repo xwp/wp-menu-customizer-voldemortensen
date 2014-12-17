@@ -1,21 +1,23 @@
 === Menu Customizer ===
 Contributors: celloexpressions, wordpressdotorg
 Tags: menus, custom menus, customizer, theme customizer, gsoc
-Requires at least: 4.0
-Tested up to: 4.0
+Requires at least: 4.1
+Tested up to: 4.1
 Stable tag: 0.1
 Description: Manage your Menus in the Customizer. GSoC Project & WordPress core feature-plugin.
 License: GPLv2
 
 == Description ==
-This plugin is a WordPress Google Summer of Code 2014 project, soon to be a WordPress core feature-plugin. See the <a href="http://make.wordpress.org/core/tag/menu-customizer/">updates on Make WordPress Core</a> for more information.
+This plugin is a WordPress core feature-plugin and a former Google Summer of Code 2014 project. See the <a href="http://make.wordpress.org/core/tag/menu-customizer/">updates on Make WordPress Core</a> for more information.
 
-The Menu Customizer adds custom menu management to the Customizer. It is not fully functional and in alpha development until further notice; please don't try to run it on a production site. The plugin requires WordPress 4.0 and PHP 5.3 or higher. It is mostly feature-complete and ready for testing, although there are known issues around adding new menus (requires some core work) and working with submenus (try the reorder mode, not drag-and-drop for now). Adding menus items could use some work as well, and is likely to have issues on sites with a large number of posts.
+The Menu Customizer adds custom menu management to the Customizer. It is not fully functional and in alpha development until further notice; please don't try to run it on a production site. The plugin requires WordPress 4.1 and PHP 5.3 or higher. It is mostly feature-complete and ready for testing, although there are known issues around working with submenus (try the reorder mode, not drag-and-drop for now). Adding menus items could use some work as well, and is likely to have scaling issues on sites with a large number of posts.
 
-If you're interested in contributing to this project, stay tuned to http://make.wordpress.org/core for updates.
+Meenu Customizer fixes some significant problems with the existing approach to menu management in core, particularly around scaling. Note that its scope carefully excludes fundamental changes with the menus paradigms; rather, the goal of this project is to modernize the menu management experience so that the UX can be iterated on more reasonably. Most importantly, Menu Customizer allows you to live-preview changes to your menus before they're published.
+
+If you're interested in contributing to this project, stay tuned to http://make.wordpress.org/core for updates, or ping @celloexpressions on <a href="http://chat.wordpress.org/">WordPress core Slack</a>.
 
 = Core Patches =
-Several improvements to the Customizer are also in the works as a part of the GSoC portion of this project, in the form of core patches (for example, the Panels API). See <a href="http://make.wordpress.org/core/2014/07/08/customizer-improvements-in-4-0/">Customizer Improvements in 4.0</a>, and an upcomming Customizer Roadmap for details.
+Several improvements to the Customizer are also in the works as a part of this project, in the form of core patches (for example, the Panels API, and the still in=progress APIs for dynamically-added controls and sections). See <a href="http://make.wordpress.org/core/tag/customize">Customizer posts on make/core</a>, and an upcomming Customizer Roadmap for details.
 
 == Installation ==
 1. Take the easy route and install through the WordPress plugin adder OR
@@ -25,6 +27,13 @@ Several improvements to the Customizer are also in the works as a part of the GS
 
 == Changelog ==
 See full details here: https://plugins.trac.wordpress.org/log/menu-customizer
+
+= 0.2 =
+* Leverage all of the new core Customizer API features that were developed in WordPress 4.1. 4.1 is required, and while we'll try to keep the plugin compatible with 4.1 for as long as possible, we may bump the requirement to 4.2-alpha eventually. Menu Customizer development was on hold while the 4.1 Customizer work happened; we'll pick things back up here now that the needed core APIs are mostly in place. If all goes well, depending on contributor interest and release timing, we may be able to propose Menu Customizer for core merge in WordPress 4.2.
+* Adding new menus should work without a page refresh now, although further work is needed here.
+* Menu item controls are rendered from JS templates now, both on init and when they're added dynamically. This should further improve performance and scalability, and is also generally awesome.
+* While not particularly relevant given the other changes, compatibility fixes for WordPress 4.1 (including a fatal error) were also made.
+* Props to @westonruter for making a couple of quick passes through the code and contributing patches to clean up the new JS implementation.
 
 = 0.1 =
 * Extensive code cleanup.
@@ -49,11 +58,5 @@ See full details here: https://plugins.trac.wordpress.org/log/menu-customizer
 * Initial commit.
 
 == Upgrade Notice ==
-= 0.0.5 =
-* Add/delete Menus; Menu item & menu data is now saved in a scalable way.
-
-= 0.0.4 =
-* Add-menu-items, use core panels implementation
-
-= 0.0.3 =
-* Initial commit.
+= 0.2 =
+* Leverage new WordPress core APIs in WordPress 4.1, fix 4.1 compatibility.
