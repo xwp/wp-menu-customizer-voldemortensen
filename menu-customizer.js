@@ -1599,7 +1599,7 @@
 					previewer: self.setting.previewer
 				};
 				api.create( menuSettingId, menuSettingId, '', settingArgs );
-				api( menuSettingId ).set( {} ); // Change from '' to {} to mark as dirty
+				api( menuSettingId ).set( new Array() ); // Change to mark as dirty.
 				
 				// Add the menu control.
 				ControlConstructor = api.controlConstructor.nav_menu;
