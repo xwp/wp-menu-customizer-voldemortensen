@@ -1588,7 +1588,7 @@
 					params: sectionParams
 				} );
 				api.section.add( sectionId, menuSection );
-				api.section( sectionId ).activate();
+				api.section( sectionId ).activate(); // @todo core this shouldn't be necessary.
 
 				// Register the menu control setting.
 				menuSettingId = 'nav_menu_' + menuParams.id;
@@ -1635,7 +1635,7 @@
 				name.val('');
 				
 				// Focus on the new menu section.
-				api.section( sectionId ).focus();
+				api.section( sectionId ).focus(); // @todo should we focus on the new menu's control and open the add-items panel? Thinking user flow...
 			});
 
 			return false;
@@ -1652,7 +1652,7 @@
 
 		// Deletes a menu (pending user confirmation).
 		submitDelete: function( el ) {
-			var params,
+			var params, dropdowns,
 				menu_id = $( el) .attr( 'id' ),
 				section = $( el ).closest( '.accordion-section' ),
 				next = section.next().find( '.accordion-section-title' );
@@ -1671,8 +1671,12 @@
 					$.post( wp.ajax.settings.url, params, function() {
 						// Remove the UI, once menu has been deleted.
 						section.slideUp( 'slow', function() {
-							section.remove();
+							section.remove(); // @todo core there should be API methods for deleting sections.
 						} );
+
+						// Remove the option from the theme location dropdowns.
+						dropdowns = $( '#accordion-section-nav .customize-control select' );
+						dropdowns.find( 'option[value=' + menu_id + ']' ).remove();
 					} );
 				}
 			}
