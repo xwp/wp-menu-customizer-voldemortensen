@@ -1810,10 +1810,14 @@
 		$( '#accordion-panel-menus' ).on( 'input', '.live-update-section-title', function(e) {
 			var el = $( e.currentTarget ),
 				name = el.val(),
-				title = el.closest( '.accordion-section' ).find( '.accordion-section-title' );
+				title = el.closest( '.accordion-section' ).find( '.accordion-section-title' ),
+				id = el.closest( '.accordion-section' ).attr( 'id' );
 			// Empty names are not allowed (will not be saved), don't update to one.
 			if ( name ) {
 				title.html( name );
+				id = id.replace( 'accordion-section-nav_menus[', '' );
+				id = id.replace( ']', '' );
+				$( '#accordion-section-nav .customize-control select option[value=' + id + ']' ).text( name );
 			}
 		} );
 		$( '#accordion-panel-menus' ).on( 'input', '.edit-menu-item-title', function(e) {
