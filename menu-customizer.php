@@ -28,6 +28,14 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 =====================================================================================
 */
 
+// @todo Move this into a WP_Customize_Menus::$previewed_menus
+global $menu_customizer_previewed_settings;
+
+/**
+ * @var WP_Customize_Setting[] $menu_customizer_previewed_settings
+ */
+$menu_customizer_previewed_settings = array();
+
 if ( is_admin() && defined( 'DOING_AJAX' ) && DOING_AJAX ) {
 	require_once( plugin_dir_path( __FILE__ ) . '/menu-customize-ajax.php' );
 }
@@ -334,8 +342,10 @@ add_action( 'customize_update_menu_autoadd', 'menu_customizer_update_menu_autoad
  *
  * @param array                $value   Array of the menu items to preview, in order.
  * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
+ * @return WP_Post|WP_Error The nav_menu post that corresponds to a setting, or a WP_Error if it doesn't exist.
  */
 function menu_customizer_preview_nav_menu( $setting ) {
+	global $menu_customizer_previewed_settings;
 
 	$menu_id = str_replace( 'nav_menu_', '', $setting->id );
 
@@ -349,35 +359,45 @@ function menu_customizer_preview_nav_menu( $setting ) {
 		return $menu;
 	}
 
-	$menu_id = $menu->term_id;
-
-	// Note that setting value is only posted if it's changed.
-	if( is_array( $setting->post_value() ) ) {
-		// @todo don't use a closure for PHP 5.2
-		add_filter( 'wp_get_nav_menu_items', function( $items, $menu, $args ) use ( $menu_id, $setting ) {
-			$preview_menu_id = $menu->term_id;
-			if ( $menu_id == $preview_menu_id ) {
-				$new_ids = $setting->post_value();
-				$new_items = array();
-				$i = 0;
-
-				// For each item, get object and update menu order property.
-				foreach ( $new_ids as $item_id ) {
-					$item = get_post( $item_id );
-					$item = wp_setup_nav_menu_item( $item );
-					$item->menu_order = $i;
-					$new_items[] = $item;
-					$i++;
-				}
-
-				return $new_items;
-			} else {
-				return $items;
-			}
-		}, 10, 3 );
-	}
+	$menu_customizer_previewed_settings[ $menu->term_id ] = $setting;
+	return $menu;
 }
 add_action( 'customize_preview_nav_menu', 'menu_customizer_preview_nav_menu', 10, 1 );
+
+/**
+ * Filter for wp_get_nav_menu_items to apply the previewed changes for a setting.
+ *
+ * @param array $items
+ * @param stdClass $menu aka WP_Term
+ * @return array
+ */
+function menu_customizer_filter_nav_menu_items_for_preview( $items, $menu ) {
+	global $menu_customizer_previewed_settings;
+	if ( ! isset( $menu_customizer_previewed_settings[ $menu->term_id ] ) ) {
+		return $items;
+	}
+	$setting = $menu_customizer_previewed_settings[ $menu->term_id ];
+
+	// Note that setting value is only posted if it's changed.
+	if ( is_array( $setting->post_value() ) ) {
+		$new_ids = $setting->post_value();
+		$new_items = array();
+		$i = 0;
+
+		// For each item, get object and update menu order property.
+		foreach ( $new_ids as $item_id ) {
+			$item = get_post( $item_id );
+			$item = wp_setup_nav_menu_item( $item );
+			$item->menu_order = $i;
+			$new_items[] = $item;
+			$i++;
+		}
+
+		$items = $new_items;
+	}
+	return $items;
+}
+add_filter( 'wp_get_nav_menu_items', 'menu_customizer_filter_nav_menu_items_for_preview', 10, 2 );
 
 /**
  * Save changes made to a nav menu.
