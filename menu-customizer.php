@@ -340,7 +340,6 @@ add_action( 'customize_update_menu_autoadd', 'menu_customizer_update_menu_autoad
  *
  * @since Menu Customizer 0.0
  *
- * @param array                $value   Array of the menu items to preview, in order.
  * @param WP_Customize_Setting $setting WP_Customize_Setting instance.
  * @return WP_Post|WP_Error The nav_menu post that corresponds to a setting, or a WP_Error if it doesn't exist.
  */
