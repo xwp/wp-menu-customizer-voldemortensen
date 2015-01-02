@@ -30,7 +30,7 @@ function menu_customizer_new_menu_ajax() {
 
 	wp_die();
 }
-add_action( 'wp_ajax_add-nav-menu-customizer', 'menu_customizer_new_menu_ajax');
+add_action( 'wp_ajax_add-nav-menu-customizer', 'menu_customizer_new_menu_ajax' );
 
 /**
  * Ajax handler for deleting a menu.
@@ -52,7 +52,7 @@ function menu_customizer_delete_menu_ajax() {
 			echo $deletion->message();
 		}
 	} else {
-		echo __( 'Error: invalid menu to delete.' );
+		_e( 'Error: invalid menu to delete.' );
 	}
 
 	wp_die();
@@ -83,7 +83,7 @@ function menu_customizer_update_item_ajax() {
 
 	wp_die();
 }
-add_action( 'wp_ajax_update-menu-item-customizer', 'menu_customizer_update_item_ajax');
+add_action( 'wp_ajax_update-menu-item-customizer', 'menu_customizer_update_item_ajax' );
 
 /**
  * Ajax handler for adding a menu item. Based on wp_ajax_add_menu_item().
@@ -113,7 +113,7 @@ function menu_customizer_add_item_ajax() {
 		'custom' != $menu_item_data['obj_type'] &&
 		! empty( $menu_item_data['id'] )
 	) {
-		switch( $menu_item_data['obj_type'] ) {
+		switch ( $menu_item_data['obj_type'] ) {
 			case 'post_type' :
 				$id = absint( str_replace( 'post-', '', $menu_item_data['id'] ) );
 				$_object = get_post( $id );
@@ -135,7 +135,7 @@ function menu_customizer_add_item_ajax() {
 	// Make the "Home" item into the custom link that it actually is.
 	if ( 'page' == $menu_item_data['type'] && 'custom' == $menu_item_data['obj_type'] ) {
 		$menu_item_data['type'] = 'custom';
-		$menu_item_data['url'] = home_url('/');
+		$menu_item_data['url'] = home_url( '/' );
 	}
 
 	// Map data from menu customizer keys to nav-menus.php keys.
