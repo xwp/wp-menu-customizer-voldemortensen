@@ -34,10 +34,10 @@ class WP_Customize_Menus {
 	 * @param $manager WP_Customize_Manager instance
 	 */
 	public function __construct( $manager ) {
-/*
- * For merge into core
- * $this->manager = $manager;
- */
+		/*
+		 * For merge into core
+		 * $this->manager = $manager;
+		 */
 		$manager = new WP_Customize_Manager();
 		$previewed_menus = array();
 
@@ -46,9 +46,9 @@ class WP_Customize_Menus {
 		add_action( 'wp_ajax_update-menu-item-customizer', array( $this, 'menu_customizer_update_item_ajax' ) );
 		add_action( 'wp_ajax_add-menu-item-customizer', array( $this, 'menu_customizer_add_item_ajax' ) );
 		add_action( 'customize_controls_enqueue_scripts', array( $this, 'menu_customizer_enqueue' ) );
-		add_action( 'customize_register', array( $this, 'menu_customizer_customize_register'), 11 ); // Needs to run after core Navigation section is set up.
+		add_action( 'customize_register', array( $this, 'menu_customizer_customize_register' ), 11 ); // Needs to run after core Navigation section is set up.
 		add_action( 'customize_update_menu_name', array( $this, 'menu_customizer_update_menu_name' ), 10, 2 );
-		add_action( 'customize_update_menu_autoadd', array( $this, 'menu_customizer_update_menu_autoadd', 10, 2 );
+		add_action( 'customize_update_menu_autoadd', array( $this, 'menu_customizer_update_menu_autoadd' ), 10, 2 );
 		add_action( 'customize_preview_nav_menu', array( $this, 'menu_customizer_preview_nav_menu' ), 10, 1 );
 		add_action( 'wp_get_nav_menu_items', array( $this, 'menu_customizer_filter_nav_menu_items_for_preview' ), 10, 2 );
 		add_action( 'customize_update_nav_menu', array( $this, 'menu_customizer_update_nav_menu' ), 10, 2 );
@@ -111,7 +111,7 @@ class WP_Customize_Menus {
 		}
 
 		wp_die();
-	}	
+	}
 
 	/**
 	 * Ajax handler for updating a menu item.
@@ -168,7 +168,7 @@ class WP_Customize_Menus {
 			'custom' != $menu_item_data['obj_type'] &&
 			! empty( $menu_item_data['id'] )
 		) {
-			switch( $menu_item_data['obj_type'] ) {
+			switch ( $menu_item_data['obj_type'] ) {
 				case 'post_type' :
 					$id = absint( str_replace( 'post-', '', $menu_item_data['id'] ) );
 					$_object = get_post( $id );
@@ -215,7 +215,7 @@ class WP_Customize_Menus {
 		}
 
 		$item = get_post( $items_id[0] );
-		if ( ! empty( $item-ID ) ) {
+		if ( ! empty( $item->ID ) ) {
 			$item = wp_setup_nav_menu_item( $item );
 			$item->label = $item->title; // Don't show "(pending)" in ajax-added item.
 
@@ -476,7 +476,7 @@ class WP_Customize_Menus {
 		}
 
 		// Update the menu name with the new $value.
-		wp_update_nav_menu_object( $id, array( 'menu-name'  => trim( esc_html( $value ) ) ) );
+		wp_update_nav_menu_object( $id, array( 'menu-name' => trim( esc_html( $value ) ) ) );
 	}
 
 	/**
@@ -625,13 +625,13 @@ class WP_Customize_Menus {
 		$old_items = array_diff( $original_ids, $items );
 
 		$i = 1;
-		foreach( $items as $item_id ) {
+		foreach ( $items as $item_id ) {
 			// Assign the existing item to this menu, in case it's orphaned. Update the order, regardless.
 			$this->menu_customizer_update_item_order( $menu_id, $item_id, $i );
 			$i++;
 		}
 
-		foreach( $old_items as $item_id ) {
+		foreach ( $old_items as $item_id ) {
 			if ( is_nav_menu_item( $item_id ) ) {
 				wp_delete_post( $item_id, true );
 			}
@@ -737,7 +737,7 @@ class WP_Customize_Menus {
 				$allposts = get_posts( $args );
 				foreach ( $allposts as $post ) {
 					$item[] = array(
-						'id'          => 'post-' . $post-ID,
+						'id'          => 'post-' . $post->ID,
 						'name'        => $post->post_title,
 						'type'        => $post_type->name,
 						'type_label'  => $post_type->labels->singular_name,
