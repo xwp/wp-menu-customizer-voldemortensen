@@ -1557,9 +1557,9 @@
 			};
 
 			$.post( wp.ajax.settings.url, params, function( menuJson ) {
-				var id, priority, menuParams, sectionId, SectionConstructor, menuSection,
+				var priority, menuParams, sectionId, SectionConstructor, menuSection,
 					menuSettingId, settingArgs, ControlConstructor, menuControl, sectionContent,
-					template, sectionParams, menuControl, option;
+					template, sectionParams, option;
 				menuParams = JSON.parse( menuJson );
 				menuParams.id = parseInt( menuParams.id, 10 );
 				sectionId = 'nav_menus[' + menuParams.id + ']';
@@ -1582,7 +1582,6 @@
 				}
 
 				// Add the menu section.
-				priority = 10;
 				SectionConstructor = api.Section;
 				menuSection = new SectionConstructor( sectionId, {
 					params: sectionParams
@@ -1598,7 +1597,7 @@
 					previewer: self.setting.previewer
 				};
 				api.create( menuSettingId, menuSettingId, '', settingArgs );
-				api( menuSettingId ).set( new Array() ); // Change to mark as dirty.
+				api( menuSettingId ).set( [] ); // Change to mark as dirty.
 				
 				// Add the menu control.
 				ControlConstructor = api.controlConstructor.nav_menu;
