@@ -684,10 +684,10 @@ function menu_customizer_print_templates() {
 			<?php
 			printf(
 				'<span class="menus-move-up" tabindex="0">%1$s</span><span class="menus-move-down" tabindex="0">%2$s</span><span class="menus-move-left" tabindex="0">%3$s</span><span class="menus-move-right" tabindex="0">%4$s</span>',
-				__( 'Move up' ),
-				__( 'Move down' ),
-				__( 'Move one level up' ),
-				__( 'Move one level down' )
+				esc_html__( 'Move up' ),
+				esc_html__( 'Move down' ),
+				esc_html__( 'Move one level up' ),
+				esc_html__( 'Move one level down' )
 			);
 			?>
 		</div>
@@ -755,7 +755,7 @@ function menu_customizer_available_items_template() {
 			foreach ( $post_types as $type ) {
 				?>
 				<div id="available-menu-items-<?php echo esc_attr( $type->name ); ?>" class="accordion-section">
-					<h4 class="accordion-section-title"><?php echo esc_attr( $type->label ); ?></h4>
+					<h4 class="accordion-section-title"><?php echo esc_html( $type->label ); ?></h4>
 					<div class="accordion-section-content">
 					</div>
 				</div>
@@ -768,7 +768,7 @@ function menu_customizer_available_items_template() {
 			foreach ( $taxonomies as $tax ) {
 				?>
 				<div id="available-menu-items-<?php echo esc_attr( $tax->name ); ?>" class="accordion-section">
-					<h4 class="accordion-section-title"><?php echo esc_attr( $tax->label ); ?></h4>
+					<h4 class="accordion-section-title"><?php echo esc_html( $tax->label ); ?></h4>
 					<div class="accordion-section-content">
 					</div>
 				</div>
