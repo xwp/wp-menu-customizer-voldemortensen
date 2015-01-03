@@ -319,11 +319,12 @@ function menu_customizer_update_menu_autoadd( $value, $setting ) {
 		$nav_menu_option['auto_add'] = array();
 	}
 	if ( $value ) {
-		if ( ! in_array( $id, $nav_menu_option['auto_add'] ) )
+		if ( ! in_array( $id, $nav_menu_option['auto_add'] ) ) {
 			$nav_menu_option['auto_add'][] = $id;
+		}
 	} else {
 		if ( false !== ( $key = array_search( $id, $nav_menu_option['auto_add'] ) ) ) {
-			unset( $nav_menu_option['auto_add'][$key] );
+			unset( $nav_menu_option['auto_add'][ $key ] );
 		}
 	}
 
@@ -442,14 +443,14 @@ function menu_customizer_update_nav_menu( $value, $setting ) {
 	$old_items = array_diff( $original_ids, $items );
 
 	$i = 1;
-	foreach( $items as $item_id ) {
+	foreach ( $items as $item_id ) {
 		// Assign the existing item to this menu, in case it's orphaned. Update the order, regardless.
 		menu_customizer_update_menu_item_order( $menu_id, $item_id, $i );
 		$i++;
 	}
 
-	foreach( $old_items as $item_id ) {
-		if( is_nav_menu_item( $item_id ) ) {
+	foreach ( $old_items as $item_id ) {
+		if ( is_nav_menu_item( $item_id ) ) {
 			wp_delete_post( $item_id, true );
 		}
 	}
@@ -480,7 +481,7 @@ function menu_customizer_update_menu_item_order( $menu_id, $item_id, $order ) {
 
 	// Associate the menu item with the menu term.
 	// Only set the menu term if it isn't set to avoid unnecessary wp_get_object_terms().
-	 if ( $menu_id && ! is_object_in_term( $item_id, 'nav_menu', (int) $menu_id ) ) {
+	if ( $menu_id && ! is_object_in_term( $item_id, 'nav_menu', (int) $menu_id ) ) {
 		wp_set_object_terms( $item_id, array( $menu_id ), 'nav_menu' );
 	}
 
@@ -488,7 +489,7 @@ function menu_customizer_update_menu_item_order( $menu_id, $item_id, $order ) {
 	$post = array(
 		'ID'          => $item_id,
 		'menu_order'  => $order,
-		'post_status' => 'publish'
+		'post_status' => 'publish',
 	);
 
 	// Update the menu item object.
@@ -515,7 +516,7 @@ function menu_customizer_update_menu_item_order( $menu_id, $item_id, $order ) {
 function menu_customizer_update_menu_item( $menu_id, $item_id, $data, $clone = false ) {
 	$item = get_post( $item_id );
 	$item = wp_setup_nav_menu_item( $item );
-    $defaults = array(
+	$defaults = array(
 		'menu-item-db-id' => $item_id,
 		'menu-item-object-id' => $item->object_id,
 		'menu-item-object' => $item->object,
@@ -556,7 +557,7 @@ function menu_customizer_available_items() {
 	$post_types = get_post_types( array( 'show_in_nav_menus' => true ), 'object' );
 
 	if ( ! $post_types ) {
-		return;
+		return array();
 	}
 
 	foreach ( $post_types as $post_type ) {
@@ -680,13 +681,15 @@ function menu_customizer_print_templates() {
 
 	<script type="text/html" id="tmpl-menu-item-reorder-nav">
 		<div class="menu-item-reorder-nav">
-			<?php printf(
+			<?php
+			printf(
 				'<span class="menus-move-up" tabindex="0">%1$s</span><span class="menus-move-down" tabindex="0">%2$s</span><span class="menus-move-left" tabindex="0">%3$s</span><span class="menus-move-right" tabindex="0">%4$s</span>',
-				__( 'Move up' ),
-				__( 'Move down' ),
-				__( 'Move one level up' ),
-				__( 'Move one level down' )
-			); ?>
+				esc_html__( 'Move up' ),
+				esc_html__( 'Move down' ),
+				esc_html__( 'Move one level up' ),
+				esc_html__( 'Move one level down' )
+			);
+			?>
 		</div>
 	</script>
 	
@@ -751,8 +754,8 @@ function menu_customizer_available_items_template() {
 		if ( $post_types ) {
 			foreach ( $post_types as $type ) {
 				?>
-				<div id="available-menu-items-<?php echo $type->name; ?>" class="accordion-section">
-					<h4 class="accordion-section-title"><?php echo $type->label; ?></h4>
+				<div id="available-menu-items-<?php echo esc_attr( $type->name ); ?>" class="accordion-section">
+					<h4 class="accordion-section-title"><?php echo esc_html( $type->label ); ?></h4>
 					<div class="accordion-section-content">
 					</div>
 				</div>
@@ -764,8 +767,8 @@ function menu_customizer_available_items_template() {
 		if ( $taxonomies ) {
 			foreach ( $taxonomies as $tax ) {
 				?>
-				<div id="available-menu-items-<?php echo $tax->name; ?>" class="accordion-section">
-					<h4 class="accordion-section-title"><?php echo $tax->label; ?></h4>
+				<div id="available-menu-items-<?php echo esc_attr( $tax->name ); ?>" class="accordion-section">
+					<h4 class="accordion-section-title"><?php echo esc_html( $tax->label ); ?></h4>
 					<div class="accordion-section-content">
 					</div>
 				</div>

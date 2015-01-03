@@ -17,8 +17,8 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 	 */
 	public function to_json() {
 		parent::to_json();
-		$this->json[ 'menu_id' ] = $this->menu_id;
-		$this->json[ 'menu_name' ] = wp_get_nav_menu_object( $this->menu_id )->name;
+		$this->json['menu_id'] = $this->menu_id;
+		$this->json['menu_name'] = wp_get_nav_menu_object( $this->menu_id )->name;
 	}
 
 	/**
@@ -41,7 +41,7 @@ class WP_Customize_Nav_Menu_Control extends WP_Customize_Control {
 		<span class="add-menu-item-loading spinner"></span>
 		<span class="reorder-toggle" tabindex="0">
 			<span class="reorder"><?php _ex( 'Reorder', 'Reorder menu items in Customizer' ); ?></span>
-			<span class="reorder-done"><?php _ex( 'Done', 'Cancel reordering menu items in Customizer'  ); ?></span>
+			<span class="reorder-done"><?php _ex( 'Done', 'Cancel reordering menu items in Customizer' ); ?></span>
 		</span>
 		<span class="menu-delete" id="delete-menu-{{ data.menu_id }}" tabindex="0">
 			<span class="screen-reader-text"><?php _e( 'Delete menu:' ); ?> {{ data.menu_name }}</span>
@@ -119,18 +119,18 @@ class WP_Customize_Menu_Item_Control extends WP_Customize_Control {
 		} elseif ( isset( $item->post_status ) && 'draft' == $item->post_status ) {
 			$classes[] = 'pending';
 			/* translators: %s: title of menu item in draft status */
-			$title = sprintf( __('%s (Pending)'), $item->title );
+			$title = sprintf( __( '%s (Pending)' ), $item->title );
 		}
 		$title = ( ! isset( $item->label ) || '' == $item->label ) ? $title : $item->label;
 		$this->json['title'] = $title;
-		$this->json['el_classes'] = implode(' ', $classes );
+		$this->json['el_classes'] = implode( ' ', $classes );
 
 		$this->json['item_type_label'] = $item->type_label;
 		$this->json['item_type'] = $item->type;
 		$this->json['url'] = $item->url;
 		$this->json['target'] = $item->target;
 		$this->json['attr_title'] = $item->attr_title;
-		$this->json['classes'] = implode(' ', $item->classes );
+		$this->json['classes'] = implode( ' ', $item->classes );
 		$this->json['xfn'] = $item->xfn;
 		$this->json['description'] = $item->description;
 		$this->json['parent'] = $item->parent;
@@ -299,13 +299,13 @@ class WP_Menu_Options_Customize_Control extends WP_Customize_Control {
 	 */
 	function wp_nav_menu_manage_columns() {
 		return array(
-			'_title' => __('Show advanced menu properties'),
+			'_title' => __( 'Show advanced menu properties' ),
 			'cb' => '<input type="checkbox" />',
-			'link-target' => __('Link Target'),
-			'attr-title' => __('Title Attribute'),
-			'css-classes' => __('CSS Classes'),
-			'xfn' => __('Link Relationship (XFN)'),
-			'description' => __('Description'),
+			'link-target' => __( 'Link Target' ),
+			'attr-title' => __( 'Title Attribute' ),
+			'css-classes' => __( 'CSS Classes' ),
+			'xfn' => __( 'Link Relationship (XFN)' ),
+			'description' => __( 'Description' ),
 		);
 	}
 }

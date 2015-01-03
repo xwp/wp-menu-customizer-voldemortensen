@@ -10,7 +10,7 @@ License: GPLv2
 == Description ==
 This plugin is a WordPress core feature-plugin and a former Google Summer of Code 2014 project. See the <a href="http://make.wordpress.org/core/tag/menu-customizer/">updates on Make WordPress Core</a> for more information.
 
-The Menu Customizer adds custom menu management to the Customizer. It is not fully functional and in alpha development until further notice; please don't try to run it on a production site. The plugin requires WordPress 4.1 and or higher. It is mostly feature-complete and ready for testing, although there are known issues around working with submenus (try the reorder mode, not drag-and-drop for now). Adding menus items could use some work as well, and is likely to have scaling issues on sites with a large number of posts.
+The Menu Customizer adds custom menu management to the Customizer. It is not fully functional and in alpha development until further notice; please don't try to run it on a production site. The plugin requires WordPress 4.1 or higher. It is mostly feature-complete and ready for testing, although there are known issues around working with submenus (try the reorder mode, not drag-and-drop for now). Adding menus items could use some work as well, and is likely to have scaling issues on sites with a large number of posts.
 
 Menu Customizer fixes some significant problems with the existing approach to menu management in core, particularly around scaling. Note that its scope carefully excludes fundamental changes with the menus paradigms; rather, the goal of this project is to modernize the menu management experience so that the UX can be iterated on more reasonably. Most importantly, Menu Customizer allows you to live-preview changes to your menus before they're published.
 

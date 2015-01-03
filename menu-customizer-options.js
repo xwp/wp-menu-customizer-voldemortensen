@@ -1,3 +1,5 @@
+/* global jQuery, ajaxurl */
+
 /*
  * Menu Customizer screen options JS.
  */
@@ -19,7 +21,7 @@
 				return false;
 			} );
 		}
-	}
+	};
 
 	// Show/hide/save screen options (columns). From common.js.
 	var columns = {
@@ -72,7 +74,7 @@
 					return id.substring( id, id.length - 5 );
 				}).get().join(',');
 			};
-		},
+		}
 	};
 
 	$( document ).ready( function() {
