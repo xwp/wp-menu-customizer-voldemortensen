@@ -880,7 +880,7 @@ class WP_Customize_Menus {
 	 */
 	public function menu_customizer_available_items_template() {
 		?>
-		<div id="avilable-menu-items" class="accordion-container">
+		<div id="available-menu-items" class="accordion-container">
 			<div id="new-custom-menu-item" class="accordion-section">
 				<h4 class="accordion-section-title"><?php _e( 'Links' ); ?></h4>
 				<div class="accordion-section-content">
