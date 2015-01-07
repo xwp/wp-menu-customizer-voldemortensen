@@ -54,7 +54,7 @@ class WP_Customize_Menus {
 		add_action( 'wp_get_nav_menu_items', array( $this, 'menu_customizer_filter_nav_menu_items_for_preview' ), 10, 2 );
 		add_action( 'customize_update_nav_menu', array( $this, 'menu_customizer_update_nav_menu' ), 10, 2 );
 		add_action( 'customize_controls_print_footer_scripts', array( $this, 'menu_customizer_print_templates' ) );
-		add_action( 'customize_controls_print_footer_scripts', 'menu_customizer_available_items_template' );
+		add_action( 'customize_controls_print_footer_scripts', array( $this, 'menu_customizer_available_items_template' ) );
 
 	}
 
