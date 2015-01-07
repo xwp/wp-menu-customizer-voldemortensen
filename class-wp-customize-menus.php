@@ -33,12 +33,13 @@ class WP_Customize_Menus {
 	 * @access public
 	 * @param $manager WP_Customize_Manager instance
 	 */
-	public function __construct( $manager ) {
+	public function __construct() {
 		/*
 		 * For merge into core
 		 * $this->manager = $manager;
 		 */
-		$manager = new WP_Customize_Manager();
+//		require_once( ABSPATH . WPINC . '/class-wp-customize-manager.php' );
+//		$manager = new WP_Customize_Manager();
 		$previewed_menus = array();
 
 		add_action( 'wp_ajax_add-nav-menu-customizer', array( $this, 'menu_customizer_new_menu_ajax' ) );
@@ -148,7 +149,7 @@ class WP_Customize_Menus {
 	 * @access public
 	 */
 	public function menu_customizer_add_item_ajax() {
-		check_ajax_referer( 'customize-menus', 'customize-menu-item-nonce' )
+		check_ajax_referer( 'customize-menus', 'customize-menu-item-nonce' );
 
 		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			wp_die( -1 );
@@ -252,12 +253,12 @@ class WP_Customize_Menus {
 		$settings = array(
 			'nonce'                => wp_create_nonce( 'customize-menus' ),
 			'allMenus'             => wp_get_nav_menus(),
-			'availableMenuItems'   => menu_customizer_available_items(),
-			'itemTypes'            => menu_customizer_available_item_types(),
+			'availableMenuItems'   => $this->menu_customizer_available_items(),
+			'itemTypes'            => $this->menu_customizer_available_item_types(),
 			'l10n'                 => array(
 				'untitled'        => _x( '(no label)', 'Missing menu item navigation label.' ),
 				'custom_label'    => _x( 'Custom', 'Custom menu item type label.' ),
-				'deleteWarn'      => _x( 'You are about to permanently delete this menu. "Cancel" to stop, "OK" to delete.' ),
+				'deleteWarn'      => __( 'You are about to permanently delete this menu. "Cancel" to stop, "OK" to delete.' ),
 			),
 		);
 
@@ -276,7 +277,7 @@ class WP_Customize_Menus {
 
 		// Require JS-rendered control types.
 		$manager->register_control_type( 'WP_Customize_Nav_Menu_Control' );
-		$manager->register_control_type( 'WP_Customizer_Menu_Item_Control' );
+		$manager->register_control_type( 'WP_Customize_Menu_Item_Control' );
 
 		// Create a panel for Menus.
 		$manager->add_panel( 'menus', array(
@@ -300,7 +301,7 @@ class WP_Customize_Menus {
 		$manager->add_setting( 'menu_customizer_options', array(
 			'type' => 'menu_options',
 		) );
-		$manager->add_setting( new WP_Menu_Options_Customize_Control( $manager, 'menu_customizer_options', array(
+		$manager->add_control( new WP_Menu_Options_Customize_Control( $manager, 'menu_customizer_options', array(
 			'section' => 'nav',
 			'priority' => 20,
 		) ) );
@@ -413,7 +414,7 @@ class WP_Customize_Menus {
 				$auto_add = false;
 			}
 
-			$menu_autoadd_setting_id = $section_id  '[auto_add]';
+			$menu_autoadd_setting_id = $section_id . '[auto_add]';
 			$manager->add_setting( $menu_autoadd_setting_id, array(
 				'type'     => 'menu_autoadd',
 				'default'  => $auto_add,
@@ -541,7 +542,7 @@ class WP_Customize_Menus {
 		if ( ! $menu || ! $menu_id ) {
 			return new WP_Error( 'invalid_menu_id', __( 'Invalid menu ID.' ) );
 		}
-		if ( is_wp_error( $menu ) {
+		if ( is_wp_error( $menu ) ) {
 			return $menu;
 		}
 
@@ -573,7 +574,7 @@ class WP_Customize_Menus {
 			foreach ( $new_ids as $item_id ) {
 				$item = get_post( $item_id );
 				$item = wp_setup_nav_menu_item( $item );
-				$item->menu_order = $i
+				$item->menu_order = $i;
 				$new_items[] = $item;
 				$i++;
 			}
@@ -743,7 +744,7 @@ class WP_Customize_Menus {
 						'type_label'  => $post_type->labels->singular_name,
 						'obj_type'    => 'post_type',
 						'order'       => strtotime( $post->post_modified ), // Posts are ordered by time updated.
-					)
+					);
 				}
 			}
 		}
