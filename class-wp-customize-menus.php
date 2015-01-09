@@ -40,7 +40,7 @@ class WP_Customize_Menus {
 		 */
 //		require_once( ABSPATH . WPINC . '/class-wp-customize-manager.php' );
 //		$manager = new WP_Customize_Manager();
-		$previewed_menus = array();
+		$this->previewed_menus = array();
 
 		add_action( 'wp_ajax_add-nav-menu-customizer', array( $this, 'menu_customizer_new_menu_ajax' ) );
 		add_action( 'wp_ajax_delete-menu-customizer', array( $this, 'menu_customizer_delete_menu_ajax' ) );
@@ -65,7 +65,7 @@ class WP_Customize_Menus {
 	 * @access public
 	 */
 	public function menu_customizer_new_menu_ajax() {
-		check_ajax_referer( 'custonmize-menus', 'customize-nav-menu-nonce' );
+		check_ajax_referer( 'customize-menus', 'customize-nav-menu-nonce' );
 
 		if ( ! current_user_can( 'edit_theme_options' ) ) {
 			wp_die( -1 );
@@ -229,7 +229,7 @@ class WP_Customize_Menus {
 				'type' => 'option',
 				'default' => array(),
 			) );
-			$control = new WP_Customize_Menu_Item_Control( $wp_customize, $setting_id, array(
+			$control = new WP_Customize_Menu_Item_Control( $this->manager, $setting_id, array(
 				'label'       => $item->title,
 				'section'     => $section_id,
 				'priority'    => $_POST['priority'],
@@ -245,7 +245,7 @@ class WP_Customize_Menus {
 	public function menu_customizer_enqueue() {
 		wp_enqueue_style( 'menu-customizer', plugin_dir_url( __FILE__ ) . 'menu-customizer.css' );
 		wp_enqueue_script( 'menu-customizer-options', plugin_dir_url( __FILE__ ) . 'menu-customizer-options.js', array( 'jquery' ) );
-		wp_enqueue_script( 'menu-customizer', plugin_dir_url( __FILE__ ) . 'menu-customizer-options.js', array( 'jquery', 'wp-backbone', 'customize-controls', 'accordion' ) );
+		wp_enqueue_script( 'menu-customizer', plugin_dir_url( __FILE__ ) . 'menu-customizer.js', array( 'jquery', 'wp-backbone', 'customize-controls', 'accordion' ) );
 
 		global $wp_scripts;
 
@@ -532,8 +532,6 @@ class WP_Customize_Menus {
 	 * @return WP_Post|WP_Error The nav_menu post that corresponds to a setting, or a WP_Error if it doesn't exist.
 	 */
 	public function menu_customizer_preview_nav_menu( $setting ) {
-		global $previewed_menus;
-
 		$menu_id = str_replace( 'nav_menu_', '', $setting->id );
 
 		// Ensure that $menu_id is valid.
@@ -546,7 +544,7 @@ class WP_Customize_Menus {
 			return $menu;
 		}
 
-		$previewed_settings[ $menu->term_id ] = $setting;
+		$this->previewed_settings[ $menu->term_id ] = $setting;
 		return $menu;
 	}
 
@@ -558,11 +556,10 @@ class WP_Customize_Menus {
 	 * @return array
 	 */
 	public function menu_customizer_filter_nav_menu_items_for_preview( $items, $menu ) {
-		global $previewed_settings;
-		if ( ! isset( $previewed_settings[ $menu->term_id ] ) ) {
+		if ( ! isset( $this->previewed_settings[ $menu->term_id ] ) ) {
 			return $items;
 		}
-		$setting = $previewed_settings[ $menu->term_id ];
+		$setting = $this->previewed_settings[ $menu->term_id ];
 
 		// Note that setting value is only posted if it's changed.
 		if ( is_array( $setting->post_value() ) ) {
