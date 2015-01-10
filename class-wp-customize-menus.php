@@ -210,7 +210,7 @@ class WP_Customize_Menus {
 			unset( $item_data['menu-item-db-id'] );
 		}
 
-		$item_ids = wp_save_nav_menu_items( 0, array( 0 => $item_data ) );
+		$items_id = wp_save_nav_menu_items( 0, array( 0 => $item_data ) );
 		if ( is_wp_error( $items_id ) || empty( $items_id ) ) {
 			wp_die( 0 );
 		}
