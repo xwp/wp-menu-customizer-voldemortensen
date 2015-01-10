@@ -38,8 +38,8 @@ class WP_Customize_Menus {
 		 * For merge into core
 		 * $this->manager = $manager;
 		 */
-//		require_once( ABSPATH . WPINC . '/class-wp-customize-manager.php' );
-//		$manager = new WP_Customize_Manager();
+		//require_once( ABSPATH . WPINC . '/class-wp-customize-manager.php' );
+		//$manager = new WP_Customize_Manager();
 		$this->previewed_menus = array();
 
 		add_action( 'wp_ajax_add-nav-menu-customizer', array( $this, 'menu_customizer_new_menu_ajax' ) );
@@ -508,8 +508,9 @@ class WP_Customize_Menus {
 			$nav_menu_option['auto_add'] = array();
 		}
 		if ( $value ) {
-			if ( ! in_array( $id, $nav_menu_option['auto_add'] ) )
+			if ( ! in_array( $id, $nav_menu_option['auto_add'] ) ) {
 				$nav_menu_option['auto_add'][] = $id;
+			}
 		} else {
 			if ( false !== ( $key = array_search( $id, $nav_menu_option['auto_add'] ) ) ) {
 				unset( $nav_menu_option['auto_add'][$key] );
