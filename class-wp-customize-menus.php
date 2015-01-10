@@ -368,7 +368,7 @@ class WP_Customize_Menus {
 				}
 			}
 
-			$items_ids = array();
+			$item_ids = array();
 			foreach ( array_values( $menu_items ) as $i => $item ) {
 				$item_ids[] = $item->ID;
 
