@@ -30,4 +30,8 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
 require_once( plugin_dir_path( __FILE__ ) . 'class-wp-customize-menus.php' );
 
-$wp_menu_customizer = new WP_Customize_Menus();
+function mytheme_customize_register( $wp_customize ) {
+   //All our sections, settings, and controls will be added here
+	$menu_customizer = new WP_Customize_Menus( $wp_customize );
+}
+add_action( 'customize_register', 'mytheme_customize_register' );
