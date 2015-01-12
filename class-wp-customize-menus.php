@@ -33,14 +33,9 @@ class WP_Customize_Menus {
 	 * @access public
 	 * @param $manager WP_Customize_Manager instance
 	 */
-	public function __construct() {
-		/*
-		 * For merge into core
-		 * $this->manager = $manager;
-		 */
-		//require_once( ABSPATH . WPINC . '/class-wp-customize-manager.php' );
-		//$manager = new WP_Customize_Manager();
+	public function __construct( $manager ) {
 		$this->previewed_menus = array();
+		$this->manager = $manager;
 
 		add_action( 'wp_ajax_add-nav-menu-customizer', array( $this, 'menu_customizer_new_menu_ajax' ) );
 		add_action( 'wp_ajax_delete-menu-customizer', array( $this, 'menu_customizer_delete_menu_ajax' ) );
