@@ -430,7 +430,7 @@ class WP_Customize_Menus {
 			'priority'  => 99,
 		) );
 
-		$manager->add_setting( 'new_manu_name', array(
+		$manager->add_setting( 'new_menu_name', array(
 			'label'        => '',
 			'section'      => 'add_menu',
 			'type'         => 'text',
