@@ -103,7 +103,7 @@ class WP_Customize_Menus {
 				echo $deletion->message();
 			}
 		} else {
-			echo __( 'Error: invalid menu to delete.' );
+			_e( 'Error: invalid menu to delete.' );
 		}
 
 		wp_die();
@@ -271,11 +271,11 @@ class WP_Customize_Menus {
 		require_once( plugin_dir_path( __FILE__ ) . '/menu-customize-controls.php' );
 
 		// Require JS-rendered control types.
-		$manager->register_control_type( 'WP_Customize_Nav_Menu_Control' );
-		$manager->register_control_type( 'WP_Customize_Menu_Item_Control' );
+		$this->manager->register_control_type( 'WP_Customize_Nav_Menu_Control' );
+		$this->manager->register_control_type( 'WP_Customize_Menu_Item_Control' );
 
 		// Create a panel for Menus.
-		$manager->add_panel( 'menus', array(
+		$this->manager->add_panel( 'menus', array(
 			'title'        => __( 'Menus' ),
 			'description'  => __( '<p>This panel is user for managing your custom navigation menus. You can add pages, posts, categories, tags, and custom links to your menus.</p><p>Menus can be displayed in locations definedd by your theme, and also used in sidebars by adding a "Custom Menu" widget in the Widgets panel.</p>' ),
 			'priority'     => 30,
@@ -287,16 +287,16 @@ class WP_Customize_Menus {
 		$description = sprintf( _n( 'Your theme contains %s menu location. Select which menu you would like to use.', 'Your theme contains %s menu locations. Select which menu appears in each location.', $num_locations ), number_format_i18n( $num_locations ) );
 		$description .= '<br>' . __( 'You can also place menus in widget areas with the Custom Menu widget.' );
 
-		$manager->get_section( 'nav' )->title = __( 'Theme Locations' );
-		$manager->get_section( 'nav' )->description = $description;
-		$manager->get_section( 'nav' )->priority = 5;
-		$manager->get_section( 'nav' )->panel = 'menus';
+		$this->manager->get_section( 'nav' )->title = __( 'Theme Locations' );
+		$this->manager->get_section( 'nav' )->description = $description;
+		$this->manager->get_section( 'nav' )->priority = 5;
+		$this->manager->get_section( 'nav' )->panel = 'menus';
 
 		// Add the screen options control to the existing "Navigation" section (it gets moved around in the JS).
-		$manager->add_setting( 'menu_customizer_options', array(
+		$this->manager->add_setting( 'menu_customizer_options', array(
 			'type' => 'menu_options',
 		) );
-		$manager->add_control( new WP_Menu_Options_Customize_Control( $manager, 'menu_customizer_options', array(
+		$this->manager->add_control( new WP_Menu_Options_Customize_Control( $manager, 'menu_customizer_options', array(
 			'section' => 'nav',
 			'priority' => 20,
 		) ) );
@@ -309,7 +309,7 @@ class WP_Customize_Menus {
 
 			// Create a section for each menu.
 			$section_id = 'nav_menus[' . $menu_id . ']';
-			$manager->add_section( $section_id, array(
+			$this->manager->add_section( $section_id, array(
 				'title'     => $menu->name,
 				'priority'  => 10,
 				'panel'     => 'menus',
@@ -317,12 +317,12 @@ class WP_Customize_Menus {
 
 			// Add a setting & control for the menu name.
 			$menu_name_setting_id = $section_id . '[name]';
-			$manager->add_setting( $menu_name_setting_id, array(
-				'default'  => '',
+			$this->manager->add_setting( $menu_name_setting_id, array(
+				'default'  => $menu->name,
 				'type'     => 'menu_name',
 			) );
 
-			$manager->add_control( $menu_name_setting_id, array(
+			$this->manager->add_control( $menu_name_setting_id, array(
 				'label'        => '',
 				'section'      => $section_id,
 				'type'         => 'text',
@@ -369,13 +369,13 @@ class WP_Customize_Menus {
 
 				// Create a setting for each menu item (which doesn't actually manage data, currently).
 				$menu_item_setting_id = $section_id . '[' . $item->ID . ']';
-				$manager->add_setting( $menu_item_setting_id, array(
+				$this->manager->add_setting( $menu_item_setting_id, array(
 					'type'     => 'option',
 					'default'  => array(),
 				) );
 
 				// Create a control for each menu item.
-				$manager->add_control( new WP_Customize_Menu_Item_Control( $manager, $menu_item_setting_id, array(
+				$this->manager->add_control( new WP_Customize_Menu_Item_Control( $manager, $menu_item_setting_id, array(
 					'label'       => $item->title,
 					'section'     => $section_id,
 					'priority'    => 10 + $i,
@@ -386,12 +386,12 @@ class WP_Customize_Menus {
 
 			// Add the menu control, which handles adding and ordering.
 			$nav_menu_setting_id = 'nav_menu_' . $menu_id;
-			$manager->add_setting( $nav_menu_setting_id, array(
+			$this->manager->add_setting( $nav_menu_setting_id, array(
 				'type'     => 'nav_menu',
 				'default'   => $item_ids,
 			) );
 
-			$manager->add_control( new WP_Customize_Nav_Menu_Control( $manager, $nav_menu_setting_id, array(
+			$this->manager->add_control( new WP_Customize_Nav_Menu_Control( $manager, $nav_menu_setting_id, array(
 				'section'   => $section_id,
 				'menu_id'   => $menu_id,
 				'priority'  => 998,
@@ -410,12 +410,12 @@ class WP_Customize_Menus {
 			}
 
 			$menu_autoadd_setting_id = $section_id . '[auto_add]';
-			$manager->add_setting( $menu_autoadd_setting_id, array(
+			$this->manager->add_setting( $menu_autoadd_setting_id, array(
 				'type'     => 'menu_autoadd',
 				'default'  => $auto_add,
 			) );
 
-			$manager->add_control( $menu_autoadd_setting_id, array(
+			$this->manager->add_control( $menu_autoadd_setting_id, array(
 				'label'     => __( 'Automatically add new top-level pages to this menu.' ),
 				'section'   => $section_id,
 				'type'      => 'checkbox',
@@ -424,13 +424,18 @@ class WP_Customize_Menus {
 		}
 
 		// Add the add-new-menu section and controls.
-		$manager->add_section( 'add_menu', array(
+		$this->manager->add_section( 'add_menu', array(
 			'title'     => __( 'New Menu' ),
 			'panel'     => 'menus',
 			'priority'  => 99,
 		) );
 
-		$manager->add_setting( 'new_menu_name', array(
+		$this->manager->add_setting( 'new_menu_name', array(
+			'type'     => 'new_menu',
+			'default'  => '',
+		) );
+
+		$this->manager->add_control( 'new_menu_name', array(
 			'label'        => '',
 			'section'      => 'add_menu',
 			'type'         => 'text',
@@ -440,11 +445,11 @@ class WP_Customize_Menus {
 			),
 		) );
 
-		$manager->add_setting( 'create_new_menu', array(
+		$this->manager->add_setting( 'create_new_menu', array(
 			'type' => 'new_menu',
 		) );
 
-		$manager->add_control( new WP_New_Menu_Customize_Control( $manager, 'create_new_menu', array(
+		$this->manager->add_control( new WP_New_Menu_Customize_Control( $manager, 'create_new_menu', array(
 			'section'  => 'add_menu',
 		) ) );
 	}
@@ -491,7 +496,7 @@ class WP_Customize_Menus {
 		}
 
 		// Get the menu id from the setting id.
-		$id = str_replace( 'nav-menu[', '', $setting->id );
+		$id = str_replace( 'nav-menus[', '', $setting->id );
 		$id = absint( str_replace( '][auto_add]', '', $id ) );
 
 		if ( ! $id ) {
@@ -602,6 +607,8 @@ class WP_Customize_Menus {
 		}
 
 		// Get original items in this menu. Any that aren't there anymore need to be deleted.
+		$originals = wp_get_nav_menu_items( $menu_id );
+		// Convert to just an array of ids.
 		$original_ids = array();
 		foreach ( $originals as $item ) {
 			$original_ids[] = $item->ID;
@@ -749,7 +756,7 @@ class WP_Customize_Menus {
 				if ( $tax ) {
 					$name = $tax->name;
 					$args = array(
-						'child-of'      => 0,
+						'child_of'      => 0,
 						'exclude'       => '',
 						'hide_empty'    => false,
 						'hierarchical'  => 1,
