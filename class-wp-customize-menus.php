@@ -126,7 +126,7 @@ class WP_Customize_Menus {
 		$item_id = $_POST['item_id'];
 		$menu_item_data = (array) $_POST['menu-item'];
 
-		$id = menu_customizer_update_menu_item( 0, $item_id, $menu_item_data, $clone );
+		$id = $this->menu_customizer_update_item( 0, $item_id, $menu_item_data, $clone );
 
 		if ( ! is_wp_error( $id ) ) {
 			echo $id;

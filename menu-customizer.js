@@ -704,6 +704,7 @@
 
 			params = {
 				'action': 'update-menu-item-customizer',
+				'wp_customize': 'on',
 				'clone' : clone,
 				'item_id': self.params.menu_item_id,
 				'menu-item': item,
@@ -1423,6 +1424,7 @@
 
 			params = {
 				'action': 'add-menu-item-customizer',
+				'wp_customize': 'on',
 				'customize-menu-item-nonce': api.Menus.data.nonce,
 				'menu': menuId,
 				'menu-item': item,
@@ -1552,6 +1554,7 @@
 
 			params = {
 				'action': 'add-nav-menu-customizer',
+				'wp_customize': 'on',
 				'menu-name': name.val(),
 				'customize-nav-menu-nonce': api.Menus.data.nonce
 			};
