@@ -28,10 +28,11 @@ Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 =====================================================================================
 */
 
-require_once( plugin_dir_path( __FILE__ ) . 'class-wp-customize-menus.php' );
 
-function mytheme_customize_register( $wp_customize ) {
-   //All our sections, settings, and controls will be added here
-	$menu_customizer = new WP_Customize_Menus( $wp_customize );
+function menu_customizer() {
+	require_once( plugin_dir_path( __FILE__ ) . 'class-wp-customize-menus.php' );
+
+	//All our sections, settings, and controls will be added here
+	$menu_customizer = new WP_Customize_Menus();
 }
-add_action( 'customize_register', 'mytheme_customize_register' );
+add_action( 'plugins_loaded', 'menu_customizer' );

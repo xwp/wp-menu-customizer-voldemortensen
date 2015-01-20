@@ -31,11 +31,9 @@ class WP_Customize_Menus {
 	 *
 	 * @since Menu Customizer 0.3
 	 * @access public
-	 * @param $manager WP_Customize_Manager instance
 	 */
-	public function __construct( $manager ) {
+	public function __construct() {
 		$this->previewed_menus = array();
-		$this->manager = $manager;
 
 		add_action( 'wp_ajax_add-nav-menu-customizer', array( $this, 'menu_customizer_new_menu_ajax' ) );
 		add_action( 'wp_ajax_delete-menu-customizer', array( $this, 'menu_customizer_delete_menu_ajax' ) );
@@ -52,6 +50,7 @@ class WP_Customize_Menus {
 		add_action( 'customize_controls_print_footer_scripts', array( $this, 'menu_customizer_available_items_template' ) );
 
 	}
+
 
 	/**
 	 * Ajax handler for creating a new menu.
@@ -151,6 +150,11 @@ class WP_Customize_Menus {
 		}
 
 		require_once ABSPATH . 'wp-admin/includes/nav-menu.php';
+		require_once ABSPATH . WPINC . '/class-wp-customize-manager.php';
+
+		if ( ! ( $this->manager instanceof WP_Customize_Manager ) ) {
+			$this->manager = new WP_Customize_Manager();
+		}
 
 		$menu_item_data = (array) $_POST['menu-item'];
 		$menu_id = absint( $_POST['menu'] ); // Used only for display, new item is created as an orphan - menu id of 0.
@@ -216,6 +220,7 @@ class WP_Customize_Menus {
 			$item->label = $item->title; // Don't show "(pending)" in ajax-added item.
 
 			// Output the json for this item's control.
+			require_once( ABSPATH . '/wp-includes/class-wp-customize-control.php' );
 			require_once( plugin_dir_path( __FILE__ ) . '/menu-customize-controls.php' );
 
 			$section_id = 'nav_menus[' . $menu_id . ']';
@@ -268,6 +273,8 @@ class WP_Customize_Menus {
 	 * @param WP_Customize_Manager $manager Theme Customizer object.
 	 */
 	public function menu_customizer_customize_register( $manager ) {
+		$this->manager = $manager;
+
 		require_once( plugin_dir_path( __FILE__ ) . '/menu-customize-controls.php' );
 
 		// Require JS-rendered control types.
