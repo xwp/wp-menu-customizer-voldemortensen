@@ -545,7 +545,7 @@ class WP_Customize_Menus {
 			return $menu;
 		}
 
-		$this->previewed_settings[ $menu->term_id ] = $setting;
+		$this->previewed_menus[ $menu->term_id ] = $setting;
 		return $menu;
 	}
 
@@ -557,10 +557,10 @@ class WP_Customize_Menus {
 	 * @return array
 	 */
 	public function menu_customizer_filter_nav_menu_items_for_preview( $items, $menu ) {
-		if ( ! isset( $this->previewed_settings[ $menu->term_id ] ) ) {
+		if ( ! isset( $this->previewed_menus[ $menu->term_id ] ) ) {
 			return $items;
 		}
-		$setting = $this->previewed_settings[ $menu->term_id ];
+		$setting = $this->previewed_menus[ $menu->term_id ];
 
 		// Note that setting value is only posted if it's changed.
 		if ( is_array( $setting->post_value() ) ) {
