@@ -46,7 +46,7 @@ class WP_Customize_Menus {
 		add_action( 'customize_update_menu_name', array( $this, 'menu_customizer_update_menu_name' ), 10, 2 );
 		add_action( 'customize_update_menu_autoadd', array( $this, 'menu_customizer_update_menu_autoadd' ), 10, 2 );
 		add_action( 'customize_preview_nav_menu', array( $this, 'menu_customizer_preview_nav_menu' ), 10, 1 );
-		add_filter( 'wp_get_nav_menu_items', array( $this, 'menu_customizer_filter_nav_menu_items_for_preview' ), 10, 2 );
+		add_filter( 'temp_pre_wp_get_nav_menu_items', array( $this, 'menu_customizer_filter_pre_nav_menu_items_for_preview' ), 10, 2 );
 		add_action( 'customize_update_nav_menu', array( $this, 'menu_customizer_update_nav_menu' ), 10, 2 );
 		add_action( 'customize_controls_print_footer_scripts', array( $this, 'menu_customizer_print_templates' ) );
 		add_action( 'customize_controls_print_footer_scripts', array( $this, 'menu_customizer_available_items_template' ) );
@@ -556,7 +556,7 @@ class WP_Customize_Menus {
 	 * @param stdClass $menu aka WP_Term
 	 * @return array
 	 */
-	public function menu_customizer_filter_nav_menu_items_for_preview( $items, $menu ) {
+	public function menu_customizer_filter_pre_nav_menu_items_for_preview( $items, $menu ) {
 		if ( ! isset( $this->previewed_menus[ $menu->term_id ] ) ) {
 			return $items;
 		}
